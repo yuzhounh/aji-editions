@@ -157,7 +157,9 @@
     },
     "about": {
         "title": "关于 AJI Editions",
-        "p1": "AJI Editions 是学术期刊索引（AJI）的多年代版本线。你可以通过顶栏切换不同年份的中科院分区表与 JCR 影响因子配对数据，在同一界面搜索、浏览和对比历年期刊指标。",
+        "p1Before": "AJI Editions 是",
+        "ajiLink": "学术期刊索引（AJI）",
+        "p1After": "的多年代版本线。你可以通过顶栏切换不同年份的中科院分区表与 JCR 影响因子配对数据，在同一界面搜索、浏览和对比历年期刊指标。",
         "p2": "平台提供影响因子、中科院分区（或新锐分区）和权威级别等关键指标，帮助用户更好地评估和选择投稿期刊。您还可以创建账户来收藏您感兴趣的期刊，以便随时访问。",
         "p3": "所有期刊数据均基于公开信息，仅供参考。数据可能存在错误，重要信息请自行核实。",
         "dataSourceTitle": "可用数据版本",
@@ -174,7 +176,8 @@
             "xynu": "信阳师范学院权威期刊目录",
             "letpub": "LetPub 最新SCI期刊影响因子查询",
             "showjcr": "hitfyd/ShowJCR: 期刊分区查询小工具",
-            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: 基于中科院JCR分区表计算权威期刊分级"
+            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: 基于中科院JCR分区表计算权威期刊分级",
+            "academicJournalIndex": "yuzhounh/academic-journal-index: 按标题搜索期刊或按学科类别浏览期刊。"
         },
         "contactTitle": "联系方式",
         "contact": {

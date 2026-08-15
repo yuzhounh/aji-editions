@@ -219,7 +219,9 @@
     },
     "about": {
         "title": "About AJI Editions",
-        "p1": "AJI Editions is the multi-year edition line of Academic Journal Index (AJI). Switch between paired CAS partition tables and JCR impact factor datasets from different release years to search, browse, and compare journal metrics in one place.",
+        "p1Before": "AJI Editions is the multi-year edition line of ",
+        "ajiLink": "Academic Journal Index (AJI)",
+        "p1After": ". Switch between paired CAS partition tables and JCR impact factor datasets from different release years to search, browse, and compare journal metrics in one place.",
         "p2": "The platform provides key metrics such as Impact Factor, CAS or XR partition rankings, and authority level, helping users evaluate and select journals for publication. You can also create an account to save favorite journals for easy access.",
         "p3": "All journal data is based on publicly available information and is intended for reference purposes. Data may contain errors. Verify important information before use.",
         "dataSourceTitle": "Available Editions",
@@ -236,7 +238,8 @@
             "xynu": "Authoritative Journal List | Xinyang Normal University",
             "letpub": "LetPub SCI Journal Impact Factor Search",
             "showjcr": "hitfyd/ShowJCR: Journal Partition Query Tool",
-            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: Authority levels from CAS partition tables"
+            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: Authority levels from CAS partition tables",
+            "academicJournalIndex": "yuzhounh/academic-journal-index: Search journals by title or browse journals by category."
         },
         "contactTitle": "Contact",
         "contact": {

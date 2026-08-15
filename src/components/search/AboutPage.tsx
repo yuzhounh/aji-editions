@@ -38,6 +38,10 @@ const linkDefs = [
     titleKey: 'about.links.authorityClassification',
     href: 'https://github.com/yuzhounh/Authoritative-Journal-Classification',
   },
+  {
+    titleKey: 'about.links.academicJournalIndex',
+    href: 'https://github.com/yuzhounh/academic-journal-index',
+  },
 ] as const;
 
 const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
@@ -122,7 +126,18 @@ export default function AboutPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="text-base text-foreground/80 leading-relaxed space-y-4">
-          <p>{t('about.p1')}</p>
+          <p>
+            {t('about.p1Before')}
+            <a
+              href="https://academic-journal-index.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              {t('about.ajiLink')}
+            </a>
+            {t('about.p1After')}
+          </p>
           <p>{t('about.p2')}</p>
           <div className="rounded-lg border border-border/60 bg-muted/30 p-4 space-y-4">
             <p className="font-medium text-foreground">{t('about.dataSourceTitle')}</p>
