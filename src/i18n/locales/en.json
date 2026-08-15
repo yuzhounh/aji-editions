@@ -213,7 +213,9 @@
     },
     "edition": {
         "switcherLabel": "Select dataset edition",
-        "currentLabel": "Current edition"
+        "currentLabel": "Current edition",
+        "loading": "Loading edition data...",
+        "loadError": "Failed to load edition data."
     },
     "about": {
         "title": "About AJI Editions",

@@ -14,6 +14,7 @@ const RAW_DIR = path.join(ROOT, "data", "raw");
 const OUTPUT_DIR = path.join(ROOT, "src", "data", "editions");
 const OUTPUT_JSON = path.join(OUTPUT_DIR, "editions.json");
 const OUTPUT_GZ = path.join(OUTPUT_DIR, "editions.json.gz");
+const PUBLIC_OUTPUT_GZ = path.join(ROOT, "public", "data", "editions.json.gz");
 
 const SHOWJCR_RAW_BASE =
   "https://raw.githubusercontent.com/hitfyd/ShowJCR/master/%E4%B8%AD%E7%A7%91%E9%99%A2%E5%88%86%E5%8C%BA%E8%A1%A8%E5%8F%8AJCR%E5%8E%9F%E5%A7%8B%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6";
@@ -820,7 +821,10 @@ function writeCollection(collection: EditionsCollection): void {
   const json = JSON.stringify(collection);
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   fs.writeFileSync(OUTPUT_JSON, json, "utf8");
-  fs.writeFileSync(OUTPUT_GZ, zlib.gzipSync(json));
+  const gzBuffer = zlib.gzipSync(json);
+  fs.writeFileSync(OUTPUT_GZ, gzBuffer);
+  fs.mkdirSync(path.dirname(PUBLIC_OUTPUT_GZ), { recursive: true });
+  fs.writeFileSync(PUBLIC_OUTPUT_GZ, gzBuffer);
 
   const totalJournals = collection.editions.reduce(
     (sum, edition) => sum + edition.journalCount,
@@ -830,6 +834,7 @@ function writeCollection(collection: EditionsCollection): void {
   console.log(
     `Wrote ${OUTPUT_GZ} (${(fs.statSync(OUTPUT_GZ).size / 1024 / 1024).toFixed(2)} MB, ${collection.editions.length} editions, ${totalJournals} total journal records)`
   );
+  console.log(`Wrote ${PUBLIC_OUTPUT_GZ} for client-side loading`);
 }
 
 export async function buildEditions(options: {
