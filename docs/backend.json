@@ -1,0 +1,296 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user account in the application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user entity."
+        },
+        "googleId": {
+          "type": "string",
+          "description": "The unique identifier from Google for this user."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        }
+      },
+      "required": [
+        "id",
+        "email"
+      ]
+    },
+    "Journal": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Journal",
+      "type": "object",
+      "description": "Represents a journal entry with its associated information.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the journal entity."
+        },
+        "journalName": {
+          "type": "string",
+          "description": "The name of the journal."
+        },
+        "year": {
+          "type": "number",
+          "description": "The year of the journal."
+        },
+        "issn": {
+          "type": "string",
+          "description": "The ISSN/EISSN of the journal."
+        },
+        "review": {
+          "type": "boolean",
+          "description": "Indicates if the journal is peer-reviewed."
+        },
+        "oaJournalIndex": {
+          "type": "boolean",
+          "description": "Indicates if the journal is in the OA Journal Index."
+        },
+        "openAccess": {
+          "type": "boolean",
+          "description": "Indicates if the journal is open access."
+        },
+        "webOfScience": {
+          "type": "string",
+          "description": "Web of Science information for the journal."
+        },
+        "impactFactor": {
+          "type": "number",
+          "description": "The impact factor of the journal."
+        },
+        "majorCategory": {
+          "type": "string",
+          "description": "The major category of the journal."
+        },
+        "majorCategoryPartition": {
+          "type": "string",
+          "description": "The major category partition of the journal."
+        },
+        "top": {
+          "type": "boolean",
+          "description": "Indicates if the journal is a top journal."
+        },
+        "authoritativeJournal": {
+          "type": "string",
+          "description": "The authority level of the journal."
+        },
+        "minorCategory1": {
+          "type": "string",
+          "description": "The first minor category of the journal."
+        },
+        "minorCategory1Partition": {
+          "type": "string",
+          "description": "The first minor category partition of the journal."
+        },
+        "minorCategory2": {
+          "type": "string",
+          "description": "The second minor category of the journal."
+        },
+        "minorCategory2Partition": {
+          "type": "string",
+          "description": "The second minor category partition of the journal."
+        },
+        "minorCategory3": {
+          "type": "string",
+          "description": "The third minor category of the journal."
+        },
+        "minorCategory3Partition": {
+          "type": "string",
+          "description": "The third minor category partition of the journal."
+        },
+        "minorCategory4": {
+          "type": "string",
+          "description": "The fourth minor category of the journal."
+        },
+        "minorCategory4Partition": {
+          "type": "string",
+          "description": "The fourth minor category partition of the journal."
+        },
+        "minorCategory5": {
+          "type": "string",
+          "description": "The fifth minor category of the journal."
+        },
+        "minorCategory5Partition": {
+          "type": "string",
+          "description": "The fifth minor category partition of the journal."
+        },
+        "minorCategory6": {
+          "type": "string",
+          "description": "The sixth minor category of the journal."
+        },
+        "minorCategory6Partition": {
+          "type": "string",
+          "description": "The sixth minor category partition of the journal."
+        }
+      },
+      "required": [
+        "id",
+        "journalName",
+        "year",
+        "issn",
+        "review",
+        "oaJournalIndex",
+        "openAccess",
+        "webOfScience",
+        "impactFactor",
+        "majorCategory",
+        "majorCategoryPartition",
+        "top",
+        "authoritativeJournal",
+        "minorCategory1",
+        "minorCategory1Partition"
+      ]
+    },
+    "FavoriteJournal": {
+      "title": "FavoriteJournal",
+      "type": "object",
+      "description": "Represents a user's favorite journal, linking a user to a journal. A journal can exist in multiple lists.",
+      "properties": {
+        "journalId": {
+          "type": "string",
+          "description": "The ID of the favorited journal."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who favorited the journal."
+        },
+        "listId": {
+          "type": "string",
+          "description": "The ID of the JournalList this favorite belongs to."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the journal was favorited."
+        }
+      },
+      "required": [
+        "journalId",
+        "userId",
+        "listId",
+        "createdAt"
+      ]
+    },
+    "JournalList": {
+      "title": "Journal List",
+      "type": "object",
+      "description": "Represents a user-created list for organizing favorite journals.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the journal list."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who created this list."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the list was created."
+        }
+      },
+      "required": [
+        "name",
+        "userId",
+        "createdAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "google",
+      "email"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information. This collection uses path-based ownership for security.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/journals/{journalId}",
+        "definition": {
+          "entityName": "Journal",
+          "schema": {
+            "$ref": "#/backend/entities/Journal"
+          },
+          "description": "Stores journal information. This collection is globally accessible for read operations.",
+          "params": [
+            {
+              "name": "journalId",
+              "description": "The unique identifier for the journal."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/journal_lists/{listId}",
+        "definition": {
+          "entityName": "JournalList",
+          "schema": {
+            "$ref": "#/backend/entities/JournalList"
+          },
+          "description": "Stores user-created journal lists. Path-based security ensures users can only access their own lists.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "listId",
+              "description": "The unique identifier for the journal list."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/favorite_journals/{favoriteJournalId}",
+        "definition": {
+          "entityName": "FavoriteJournal",
+          "schema": {
+            "$ref": "#/backend/entities/FavoriteJournal"
+          },
+          "description": "Stores individual favorited journal entries. A favorite links a journal to a user and one of their lists.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            },
+            {
+              "name": "favoriteJournalId",
+              "description": "The unique identifier for the favorite journal entry (often a composite ID)."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to support user authentication, journal searching, and a multi-list favoriting system. The structure emphasizes authorization independence and efficient querying. Journals are in a top-level collection. User-specific data (journal lists and the favorites within them) are stored in subcollections under each user's document. This allows for simple, powerful security rules based on path ownership.\n\n**Authorization Independence:**\n*   The `/users/{userId}/...` path structure inherently provides the user context for security rules, making it easy to ensure users can only modify their own data.\n\n**QAPs Support:**\n*   **List Journals (Global):** The top-level `journals` collection allows for efficient global searching and filtering.\n*   **List a User's Journal Lists:** Querying `/users/{userId}/journal_lists` is a direct and secure way to fetch all lists for the logged-in user.\n*   **List Journals within a Specific List:** Querying the `favorite_journals` collection with a `where('listId', '==', listId)` clause allows for fetching all journals belonging to a specific user-created list."
+  }
+}

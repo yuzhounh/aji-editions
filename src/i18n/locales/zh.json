@@ -1,0 +1,389 @@
+
+{
+    "nav": {
+        "search": "搜索",
+        "browse": "浏览",
+        "favorites": "收藏",
+        "about": "关于"
+    },
+    "header": {
+        "title": "AJI Editions",
+        "subtitle": "切换历年数据版本，按标题搜索或按类别浏览期刊。"
+    },
+    "search": {
+        "placeholder": "输入期刊名称进行搜索...",
+        "ariaLabel": "搜索期刊",
+        "initial": {
+            "title": "开始搜索",
+            "description": "输入至少3个字符以开始搜索期刊。"
+        },
+        "noResults": "未找到关于 “{{searchTerm}}” 的期刊。",
+        "examplesLabel": "试试搜索",
+        "examples": ["Nature", "Cell", "Lancet", "IEEE"]
+    },
+    "categories": {
+        "journals": "本期刊",
+        "browseTitle": "按学科浏览",
+        "browseSubtitle": "探索 20+ 中科院大类学科分区期刊。",
+        "browseSubtitleXr": "探索 20+ 新锐大类学科分区期刊。",
+        "filterPlaceholder": "筛选学科类别...",
+        "noMatch": "未找到匹配的学科类别。"
+    },
+    "pagination": {
+        "previous": "上一页",
+        "next": "下一页",
+        "total": "共",
+        "pages": "页"
+    },
+    "journal": {
+        "back": "返回列表",
+        "favorite": "添加到收藏",
+        "unfavorite": "从收藏中移除",
+        "basicInfo": "基本信息",
+        "year": "年份",
+        "review": "综述期刊",
+        "impactFactor": "影响因子",
+        "openAccess": "开放获取",
+        "oa": "OA",
+        "apc": "文章处理费",
+        "googleSearch": "Google 搜索",
+        "casPartition": "中科院分区",
+        "casMajorPartition": "CAS 大类分区",
+        "casPartitionShort": "中科院分区",
+        "casDescription": "中国科学院期刊分区。",
+        "xrPartition": "新锐分区",
+        "xrMajorPartition": "新锐大类分区",
+        "xrPartitionShort": "新锐分区",
+        "xrDescription": "新锐期刊分区。",
+        "aiSummary": "AI 智能分析",
+        "aiDisclaimer": "AI 生成的分析，请核实关键信息。",
+        "relatedJournals": "相关期刊",
+        "relatedDisclaimer": "AI 建议的相似期刊。",
+        "summaryError": "生成 AI 智能分析失败。",
+        "generateAnalysis": "生成分析"
+    },
+    "cas": {
+        "authorityLevel": "权威级别",
+        "authority": {
+            "1": "一级",
+            "2": "二级",
+            "3": "三级"
+        },
+        "partitions": {
+            "1": "一区",
+            "2": "二区",
+            "3": "三区",
+            "4": "四区"
+        },
+        "majorCategory": "大类",
+        "minorCategories": "小类",
+        "tooltip": {
+            "title": "权威期刊分级规则",
+            "ariaLabel": "关于权威期刊分级规则的信息",
+            "level1": {
+                "title": "一级权威期刊",
+                "rule1": "中科院JCR大类分区一区期刊",
+                "rule2": "中科院JCR大类分区二区前50%（含50%）期刊"
+            },
+            "level2": {
+                "title": "二级权威期刊",
+                "rule1": "中科院JCR大类分区二区后50%期刊",
+                "rule2": "中科院JCR大类分区三区期刊"
+            },
+            "level3": {
+                "title": "三级权威期刊",
+                "rule1": "中科院JCR大类分区四区期刊"
+            }
+        }
+    },
+    "xr": {
+        "authorityLevel": "权威级别",
+        "authority": {
+            "1": "一级",
+            "2": "二级",
+            "3": "三级"
+        },
+        "partitions": {
+            "1": "一区",
+            "2": "二区",
+            "3": "三区",
+            "4": "四区"
+        },
+        "majorCategory": "大类",
+        "minorCategories": "小类",
+        "tooltip": {
+            "title": "权威期刊分级规则",
+            "ariaLabel": "关于权威期刊分级规则的信息",
+            "level1": {
+                "title": "一级权威期刊",
+                "rule1": "新锐大类分区一区期刊",
+                "rule2": "新锐大类分区二区前50%（含50%）期刊"
+            },
+            "level2": {
+                "title": "二级权威期刊",
+                "rule1": "新锐大类分区二区后50%期刊",
+                "rule2": "新锐大类分区三区期刊"
+            },
+            "level3": {
+                "title": "三级权威期刊",
+                "rule1": "新锐大类分区四区期刊"
+            }
+        }
+    },
+    "stats": {
+        "title": "期刊统计",
+        "totalJournals": "期刊总数",
+        "partitionTitle": "中科院分区分布",
+        "xrPartitionTitle": "新锐分区分布",
+        "authorityTitle": "权威级别分布",
+        "oaTitle": "开放获取分布",
+        "oa": {
+            "open": "开放获取",
+            "closed": "订阅访问"
+        },
+        "count": "数量",
+        "ratio": "比例",
+        "expand": "展开详情",
+        "collapse": "收起详情",
+        "summaryTotal": "共 {{count}} 本",
+        "summaryPartition": "{{name}} {{percent}}%",
+        "summaryOa": "OA {{percent}}%"
+    },
+    "edition": {
+        "switcherLabel": "选择数据版本",
+        "currentLabel": "当前版本"
+    },
+    "about": {
+        "title": "关于 AJI Editions",
+        "p1": "AJI Editions 是学术期刊索引（AJI）的多年代版本线。你可以通过顶栏切换不同年份的中科院分区表与 JCR 影响因子配对数据，在同一界面搜索、浏览和对比历年期刊指标。",
+        "p2": "平台提供影响因子、中科院分区（或新锐分区）和权威级别等关键指标，帮助用户更好地评估和选择投稿期刊。您还可以创建账户来收藏您感兴趣的期刊，以便随时访问。",
+        "p3": "所有期刊数据均基于公开信息，仅供参考。数据可能存在错误，重要信息请自行核实。",
+        "dataSourceTitle": "可用数据版本",
+        "dataSourceIntro": "每个版本将分区表与其发布时可用的最新 JCR 影响因子配对：",
+        "dataJcr": "JCR 影响因子",
+        "dataCas": "中科院分区表",
+        "dataXr": "新锐分区表",
+        "editionRelease": "发布于 {{date}}",
+        "linksTitle": "相关链接",
+        "links": {
+            "jcr": "期刊引证报告 | 科睿唯安",
+            "cas": "中国科学院文献情报中心期刊分区表",
+            "xr": "新锐期刊分区表",
+            "xynu": "信阳师范学院权威期刊目录",
+            "letpub": "LetPub 最新SCI期刊影响因子查询",
+            "showjcr": "hitfyd/ShowJCR: 期刊分区查询小工具",
+            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: 基于中科院JCR分区表计算权威期刊分级"
+        },
+        "contactTitle": "联系方式",
+        "contact": {
+            "author": "作者",
+            "authorName": "Jing Wang",
+            "email": "邮箱",
+            "github": "GitHub"
+        },
+        "features": {
+            "title": "功能特性",
+            "search": {
+                "title": "搜索期刊",
+                "p1": "在“搜索”页面使用搜索框按名称查找期刊。您需要输入至少三个字符才能开始搜索。结果默认按影响因子排序。"
+            },
+            "browse": {
+                "title": "浏览分类",
+                "p1": "进入“浏览”页面查看所有可用的期刊分类。点击任一分类即可查看该分类下的期刊列表，列表按中科院分区排名排序。"
+            },
+            "favorites": {
+                "title": "管理收藏",
+                "p1": "登录后，您可以点击任何期刊详情页上的心形图标将其添加到您的收藏夹。您的收藏夹可在“收藏”页面查看，并按列表进行整理。"
+            },
+            "ai": {
+                "title": "AI智能分析",
+                "p1": "在每个期刊的详情页上，点击“生成分析”按钮。我们的AI助手将提供该期刊的摘要并推荐相关的出版物。"
+            }
+        },
+        "feedback": {
+            "title": "问题与反馈",
+            "p1": "有任何问题或改进建议吗？我们很乐意倾听！请在我们的GitHub仓库中提交一个Issue。",
+            "button": "提交GitHub Issue"
+        }
+    },
+    "favorites": {
+        "loading": "正在加载收藏...",
+        "login": {
+            "title": "请登录",
+            "description": "您需要登录才能查看和保存您收藏的期刊。",
+            "button": "返回首页"
+        },
+        "empty": {
+            "title": "暂无收藏",
+            "description": "您还没有创建任何期刊列表。您可以从CSV文件导入列表。",
+            "button": "查找期刊进行收藏"
+        },
+        "listEmpty": "该期刊列表为空。",
+        "dialog": {
+            "title": "添加到列表...",
+            "newListPlaceholder": "新列表名称...",
+            "createButton": "创建",
+            "saveButton": "保存",
+            "saveSuccessTitle": "收藏已更新",
+            "saveSuccessDescription": "您的期刊已保存到所选列表中。",
+            "saveErrorDescription": "无法保存您的更改，请重试。"
+        },
+        "uncategorized": "未分类",
+        "deleteList": {
+            "title": "删除 '{{listName}}'？",
+            "description": "此操作无法撤销。此列表中的所有期刊收藏记录将被彻底删除。",
+            "confirmButton": "是的，删除列表",
+            "successTitle": "列表已删除",
+            "successDescription": "列表 '{{listName}}' 已被删除。",
+            "errorTitle": "删除列表时出错",
+            "ariaLabel": "删除列表 {{listName}}"
+        },
+        "renameList": {
+            "title": "重命名列表...",
+            "errorTitle": "重命名列表时出错",
+            "ariaLabel": "重命名列表 {{listName}}"
+        },
+        "importList": {
+            "button": "从 CSV 导入",
+            "successTitle": "导入成功",
+            "successDescription": "已创建新列表 '{{listName}}'，包含 {{count}} 本期刊。",
+            "errorTitle": "导入失败",
+            "errorDescription": "无法导入列表。请检查文件格式后重试。"
+        },
+        "createList": {
+            "button": "创建新列表",
+            "title": "创建新期刊列表",
+            "description": "为您的新列表输入一个名称。",
+            "successTitle": "列表已创建",
+            "successDescription": "列表 '{{listName}}' 已成功创建。",
+            "errorTitle": "创建列表时出错"
+        },
+        "clearAll": {
+            "menuItem": "清空所有收藏",
+            "title": "清空所有收藏？",
+            "description": "此操作无法撤销。这将永久删除您所有的期刊列表和收藏的期刊。",
+            "confirmButton": "是的，全部清空",
+            "successTitle": "收藏已清空",
+            "successDescription": "您所有的列表和期刊均已被删除。",
+            "errorTitle": "清空收藏时出错"
+        }
+    },
+    "auth": {
+        "welcomeBack": "欢迎回来",
+        "createAccount": "创建账户",
+        "signInToFavorites": "登录以访问您的收藏。",
+        "signUpToFavorites": "注册以开始保存您最喜欢的期刊。",
+        "login": "登录",
+        "logout": "退出",
+        "register": "注册",
+        "orContinueWith": "或",
+        "email": "邮箱",
+        "password": "密码",
+        "confirmPassword": "确认密码",
+        "passwordsDoNotMatch": "密码不匹配。",
+        "forgotPassword": "忘记密码？",
+        "nickname": "昵称",
+        "nicknamePlaceholder": "例如：张三",
+        "nicknameRequired": "昵称至少需要2个字符。",
+        "googleSignInFailed": "Google 登录失败",
+        "unknownError": "发生未知错误。",
+        "loginFailed": "登录失败",
+        "registrationFailed": "注册失败",
+        "checkCredentials": "请检查您的凭据并重试。",
+        "reset": {
+            "title": "重置密码",
+            "description": "输入您的电子邮箱地址，我们将向您发送重置密码的链接。",
+            "button": "发送重置邮件",
+            "backToLogin": "返回登录",
+            "successTitle": "密码重置邮件已发送",
+            "successDescription": "请检查您的收件箱以获取密码重置链接。",
+            "errorTitle": "错误"
+        },
+        "verification": {
+            "emailSentTitle": "验证邮件已发送",
+            "emailSentDescription": "验证链接已发送到您的邮箱地址，请查收。"
+        },
+        "changeEmail": {
+            "menuItem": "修改邮箱",
+            "title": "修改您的邮箱地址",
+            "description": "您当前的邮箱是 {{email}}。验证链接将被发送到新的邮箱地址，您必须点击链接以确认更改。",
+            "newEmailLabel": "新邮箱地址",
+            "submitButton": "更新邮箱",
+            "successTitle": "验证邮件已发送",
+            "successDescription": "用于验证新邮箱地址的链接已发送至 {{email}}。请检查您的收件箱。",
+            "errorTitle": "修改邮箱时出错",
+            "invalidEmail": "请输入有效的邮箱地址。"
+        },
+        "changePassword": {
+            "menuItem": "修改密码",
+            "title": "修改您的密码",
+            "description": "我们将向您的邮箱（{{email}}）发送一个密码重置链接。请点击邮件中的链接来设置新密码。",
+            "submitButton": "发送重置邮件",
+            "successDescription": "密码重置链接已发送至 {{email}}。请检查您的收件箱。",
+            "errorTitle": "修改密码时出错",
+            "noEmailError": "此账户没有关联的邮箱地址。"
+        },
+        "changeNickname": {
+            "menuItem": "修改昵称",
+            "title": "修改您的昵称",
+            "description": "您当前的昵称是 '{{nickname}}'。",
+            "noNicknameDescription": "您还没有设置昵称。",
+            "newNicknameLabel": "新昵称",
+            "submitButton": "更新昵称",
+            "successTitle": "昵称已更新",
+            "successDescription": "您的昵称已成功更新。",
+            "errorTitle": "更新昵称时出错"
+        },
+        "changeAvatar": {
+            "menuItem": "更换头像",
+            "title": "更换头像",
+            "description": "选择一个预设头像或上传您自己的图片。",
+            "predefined": "从预设中选择",
+            "uploadButton": "上传图片",
+            "successTitle": "头像已更新",
+            "errorTitle": "更新头像时出错"
+        }
+    },
+    "yes": "是",
+    "no": "否",
+    "common": {
+        "cancel": "取消",
+        "save": "保存",
+        "exportCsv": "导出为 CSV",
+        "error": "错误"
+    },
+    "batchEdit": {
+        "button": "批量编辑",
+        "selectAll": "全选",
+        "deselectAll": "取消全选",
+        "selected": "已选择 {{count}} 项",
+        "move": {
+            "button": "移动到...",
+            "title": "将 {{count}} 本期刊移动到...",
+            "successTitle": "移动成功",
+            "successDescription": "已成功移动 {{count}} 本期刊。",
+            "errorDescription": "移动期刊时发生错误。"
+        },
+        "remove": {
+            "button": "删除",
+            "confirmTitle_one": "确定移除这 1 本期刊吗？",
+            "confirmTitle_other": "确定移除这 {{count}} 本期刊吗？",
+            "confirmDescription": "此操作将从此列表 “{{listName}}” 中移除所选期刊，该操作无法撤销。",
+            "successTitle": "移除成功",
+            "successDescription_one": "已从此列表中移除 1 本期刊。",
+            "successDescription_other": "已从此列表中移除 {{count}} 本期刊。",
+            "errorTitle": "移除失败",
+            "errorDescription": "移除期刊时发生错误。"
+        },
+        "add": {
+            "button": "添加到列表",
+            "title": "将 {{count}} 本期刊添加到...",
+            "successTitle": "添加成功",
+            "successDescription": "已成功将 {{count}} 本期刊添加到您的收藏。",
+            "errorDescription": "添加期刊时发生错误。"
+        },
+        "favorite": {
+            "editButton": "批量收藏"
+        }
+    }
+}

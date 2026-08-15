@@ -1,0 +1,2 @@
+# Raw CSV files from ShowJCR are downloaded here by `npm run build:journals`.
+# They are gitignored; only the generated `src/data/journals.json.gz` is committed.

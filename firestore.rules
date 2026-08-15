@@ -1,0 +1,90 @@
+/**
+ * @fileOverview Firestore Security Rules for the Journaling application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for personal data (journal lists, favorite journals) and allows public read access to the global journals collection.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles.
+ * - /journals/{journalId}: Stores global journal data, publicly readable.
+ * - /users/{userId}/journal_lists/{listId}: Stores user-created journal lists.
+ * - /users/{userId}/favorite_journals/{favoriteJournalId}: Stores user's favorite journals within lists.
+ *
+ * Key Security Decisions:
+ * - Users can only access their own user document and data nested under it.
+ * - Listing all users is disallowed.
+ * - Journal data is publicly readable but write access is restricted to application admins (currently not implemented).
+ * - The `id` field inside documents under `/users/{userId}` is validated to match the `userId` path parameter on creation and is immutable on update to prevent ownership hijacking.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secure user profiles. Only the owner can read or write their own profile.
+     * @path /users/{userId}
+     * @allow (get, create, update, delete) User with matching {userId} in request.auth can perform operation.
+     * @deny (get, create, update, delete) User without matching {userId} in request.auth cannot perform operation.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /users/{userId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+
+      allow get: if isOwner(userId);
+      allow list: if false; // Listing all users is not permitted.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isOwner(userId) && resource.data.id == userId;
+      allow delete: if isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Allows public read access to journals data. Write operations should be restricted to admins.
+     * @path /journals/{journalId}
+     * @allow (get, list) Any user can read journal data.
+     * @deny (create, update, delete) Only admins can create, update, or delete journals.
+     * @principle Public read access with owner-only writes.
+     */
+    match /journals/{journalId} {
+      allow get, list: if true;
+      allow create, update, delete: if false; // TODO: Implement admin role check for journal writes.
+    }
+
+    /**
+     * @description Secures journal lists under a user's profile. Only the owner can read or write their own lists.
+     * @path /users/{userId}/journal_lists/{listId}
+     * @allow (get, create, update, delete, list) User with matching {userId} in request.auth can perform operation.
+     * @deny (get, create, update, delete, list) User without matching {userId} in request.auth cannot perform operation.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /users/{userId}/journal_lists/{listId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && resource != null;
+      allow delete: if isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Secures favorite journals under a user's profile. Only the owner can read or write their own favorites.
+     * @path /users/{userId}/favorite_journals/{favoriteJournalId}
+     * @allow (get, create, update, delete, list) User with matching {userId} in request.auth can perform operation.
+     * @deny (get, create, update, delete, list) User without matching {userId} in request.auth cannot perform operation.
+     * @principle Enforces document ownership for writes and reads.
+     */
+    match /users/{userId}/favorite_journals/{favoriteJournalId} {
+      function isOwner(userId) {
+        return request.auth != null && request.auth.uid == userId;
+      }
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && resource != null;
+      allow delete: if isOwner(userId) && resource != null;
+    }
+  }
+}

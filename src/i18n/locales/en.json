@@ -1,0 +1,389 @@
+
+{
+    "nav": {
+        "search": "Search",
+        "browse": "Browse",
+        "favorites": "Favorites",
+        "about": "About"
+    },
+    "header": {
+        "title": "AJI Editions",
+        "subtitle": "Switch dataset editions and search or browse journals by category."
+    },
+    "search": {
+        "placeholder": "Enter a journal name to search...",
+        "ariaLabel": "Search journals",
+        "initial": {
+            "title": "Start your search",
+            "description": "Enter at least 3 characters to begin searching for journals."
+        },
+        "noResults": "No journals found for \"{{searchTerm}}\".",
+        "examplesLabel": "Try searching",
+        "examples": ["Nature", "Cell", "Lancet", "IEEE"]
+    },
+    "categories": {
+        "journals": "journals",
+        "browseTitle": "Browse by Field",
+        "browseSubtitle": "Explore journals across 20+ major CAS categories.",
+        "browseSubtitleXr": "Explore journals across 20+ major Xinrui categories.",
+        "filterPlaceholder": "Filter categories...",
+        "noMatch": "No matching categories found."
+    },
+    "pagination": {
+        "previous": "Previous",
+        "next": "Next",
+        "total": "Total",
+        "pages": "pages"
+    },
+    "journal": {
+        "back": "Back to list",
+        "favorite": "Add to favorites",
+        "unfavorite": "Remove from favorites",
+        "basicInfo": "Basic Information",
+        "year": "Year",
+        "review": "Review Journal",
+        "impactFactor": "Impact Factor",
+        "openAccess": "Open Access",
+        "oa": "OA",
+        "apc": "APC",
+        "googleSearch": "Google Search",
+        "casPartition": "CAS Partition",
+        "casMajorPartition": "CAS Major Category Partition",
+        "casPartitionShort": "CAS Partition",
+        "casDescription": "Chinese Academy of Sciences (CAS) journal ranking.",
+        "xrPartition": "XR Partition",
+        "xrMajorPartition": "Xinrui Major Category Partition",
+        "xrPartitionShort": "XR Partition",
+        "xrDescription": "Xinrui journal partition ranking.",
+        "aiSummary": "AI-Powered Analysis",
+        "aiDisclaimer": "AI-generated analysis. Please verify critical information.",
+        "relatedJournals": "Related Journals",
+        "relatedDisclaimer": "Similar journals suggested by AI.",
+        "summaryError": "Failed to generate AI-powered analysis.",
+        "generateAnalysis": "Generate Analysis"
+    },
+    "cas": {
+        "authorityLevel": "Authority Level",
+        "authority": {
+            "1": "Level 1",
+            "2": "Level 2",
+            "3": "Level 3"
+        },
+        "partitions": {
+            "1": "Q1",
+            "2": "Q2",
+            "3": "Q3",
+            "4": "Q4"
+        },
+        "majorCategory": "Major Category",
+        "minorCategories": "Minor Categories",
+        "tooltip": {
+            "title": "Authority Journal Ranking Rules",
+            "ariaLabel": "Information about authority journal ranking rules",
+            "level1": {
+                "title": "Level 1 Authority Journal",
+                "rule1": "CAS JCR Major Category Partition Q1 journals",
+                "rule2": "Top 50% of CAS JCR Major Category Partition Q2 journals"
+            },
+            "level2": {
+                "title": "Level 2 Authority Journal",
+                "rule1": "Bottom 50% of CAS JCR Major Category Partition Q2 journals",
+                "rule2": "CAS JCR Major Category Partition Q3 journals"
+            },
+            "level3": {
+                "title": "Level 3 Authority Journal",
+                "rule1": "CAS JCR Major Category Partition Q4 journals"
+            }
+        }
+    },
+    "xr": {
+        "authorityLevel": "Authority Level",
+        "authority": {
+            "1": "Level 1",
+            "2": "Level 2",
+            "3": "Level 3"
+        },
+        "partitions": {
+            "1": "Q1",
+            "2": "Q2",
+            "3": "Q3",
+            "4": "Q4"
+        },
+        "majorCategory": "Major Category",
+        "minorCategories": "Minor Categories",
+        "tooltip": {
+            "title": "Authority Journal Ranking Rules",
+            "ariaLabel": "Information about authority journal ranking rules",
+            "level1": {
+                "title": "Level 1 Authority Journal",
+                "rule1": "Xinrui Major Category Partition Q1 journals",
+                "rule2": "Top 50% of Xinrui Major Category Partition Q2 journals"
+            },
+            "level2": {
+                "title": "Level 2 Authority Journal",
+                "rule1": "Bottom 50% of Xinrui Major Category Partition Q2 journals",
+                "rule2": "Xinrui Major Category Partition Q3 journals"
+            },
+            "level3": {
+                "title": "Level 3 Authority Journal",
+                "rule1": "Xinrui Major Category Partition Q4 journals"
+            }
+        }
+    },
+    "stats": {
+        "title": "Journal Statistics",
+        "totalJournals": "Total Journals",
+        "partitionTitle": "CAS Partition Breakdown",
+        "xrPartitionTitle": "Xinrui Partition Breakdown",
+        "authorityTitle": "Authority Level Breakdown",
+        "oaTitle": "Open Access Breakdown",
+        "oa": {
+            "open": "Open Access",
+            "closed": "Closed Access"
+        },
+        "count": "Count",
+        "ratio": "Ratio",
+        "expand": "Show details",
+        "collapse": "Hide details",
+        "summaryTotal": "{{count}} journals",
+        "summaryPartition": "{{name}} {{percent}}%",
+        "summaryOa": "OA {{percent}}%"
+    },
+    "favorites": {
+        "loading": "Loading favorites...",
+        "login": {
+            "title": "Please Log In",
+            "description": "You need to be logged in to view and save your favorite journals.",
+            "button": "Back to Home"
+        },
+        "empty": {
+            "title": "No Favorites Yet",
+            "description": "You haven't created any journal lists yet. You can import a list from a CSV file.",
+            "button": "Find Journals to Favorite"
+        },
+        "listEmpty": "This journal list is empty.",
+        "dialog": {
+            "title": "Add to list...",
+            "newListPlaceholder": "New list name...",
+            "createButton": "Create",
+            "saveButton": "Save",
+            "saveSuccessTitle": "Favorites Updated",
+            "saveSuccessDescription": "Your journal has been saved to the selected lists.",
+            "saveErrorDescription": "Could not save your changes. Please try again."
+        },
+        "uncategorized": "Uncategorized",
+        "deleteList": {
+            "title": "Delete '{{listName}}'?",
+            "description": "This action cannot be undone. All favorited journals within this list will be permanently removed.",
+            "confirmButton": "Yes, delete list",
+            "successTitle": "List Deleted",
+            "successDescription": "The list '{{listName}}' has been deleted.",
+            "errorTitle": "Error Deleting List",
+            "ariaLabel": "Delete list {{listName}}"
+        },
+        "renameList": {
+            "title": "Rename list...",
+            "errorTitle": "Error Renaming List",
+            "ariaLabel": "Rename list {{listName}}"
+        },
+        "importList": {
+            "button": "Import from CSV",
+            "successTitle": "Import Successful",
+            "successDescription": "Created new list '{{listName}}' with {{count}} journals.",
+            "errorTitle": "Import Failed",
+            "errorDescription": "Could not import the list. Please check the file format and try again."
+        },
+        "createList": {
+            "button": "Create New List",
+            "title": "Create a New Journal List",
+            "description": "Enter a name for your new list.",
+            "successTitle": "List Created",
+            "successDescription": "The list '{{listName}}' has been successfully created.",
+            "errorTitle": "Error Creating List"
+        },
+        "clearAll": {
+            "menuItem": "Clear All Favorites",
+            "title": "Clear All Favorites?",
+            "description": "This action cannot be undone. This will permanently delete all of your journal lists and all of your favorited journals.",
+            "confirmButton": "Yes, clear everything",
+            "successTitle": "Favorites Cleared",
+            "successDescription": "All of your lists and journals have been deleted.",
+            "errorTitle": "Error Clearing Favorites"
+        }
+    },
+    "edition": {
+        "switcherLabel": "Select dataset edition",
+        "currentLabel": "Current edition"
+    },
+    "about": {
+        "title": "About AJI Editions",
+        "p1": "AJI Editions is the multi-year edition line of Academic Journal Index (AJI). Switch between paired CAS partition tables and JCR impact factor datasets from different release years to search, browse, and compare journal metrics in one place.",
+        "p2": "The platform provides key metrics such as Impact Factor, CAS or XR partition rankings, and authority level, helping users evaluate and select journals for publication. You can also create an account to save favorite journals for easy access.",
+        "p3": "All journal data is based on publicly available information and is intended for reference purposes. Data may contain errors. Verify important information before use.",
+        "dataSourceTitle": "Available Editions",
+        "dataSourceIntro": "Each edition pairs a partition table with the latest JCR impact factor available at its release date:",
+        "dataJcr": "JCR Impact Factor",
+        "dataCas": "CAS Partition Table",
+        "dataXr": "XR Partition Table",
+        "editionRelease": "Released {{date}}",
+        "linksTitle": "Related Links",
+        "links": {
+            "jcr": "Journal Citation Reports | Clarivate",
+            "cas": "CAS Journal Partition Table | Chinese Academy of Sciences",
+            "xr": "Xinrui Journal Ranking",
+            "xynu": "Authoritative Journal List | Xinyang Normal University",
+            "letpub": "LetPub SCI Journal Impact Factor Search",
+            "showjcr": "hitfyd/ShowJCR: Journal Partition Query Tool",
+            "authorityClassification": "yuzhounh/Authoritative-Journal-Classification: Authority levels from CAS partition tables"
+        },
+        "contactTitle": "Contact",
+        "contact": {
+            "author": "Author",
+            "authorName": "Jing Wang",
+            "email": "Email",
+            "github": "GitHub"
+        },
+        "features": {
+            "title": "Features",
+            "search": {
+                "title": "Searching for Journals",
+                "p1": "Use the search bar on the 'Search' page to find journals by name. You need to enter at least three characters to start the search. Results are sorted by impact factor by default."
+            },
+            "browse": {
+                "title": "Browsing Categories",
+                "p1": "Go to the 'Browse' page to see all available journal categories. Click on any category to view a list of journals within it, sorted by their CAS partition ranking."
+            },
+            "favorites": {
+                "title": "Managing Favorites",
+                "p1": "After logging in, you can add any journal to your favorites by clicking the heart icon on its detail page. Your favorites are available on the 'Favorites' page, organized in lists."
+            },
+            "ai": {
+                "title": "AI-Powered Analysis",
+                "p1": "On each journal's detail page, click the 'Generate Analysis' button. Our AI assistant will provide a summary of the journal and suggest related publications."
+            }
+        },
+        "feedback": {
+            "title": "Questions & Feedback",
+            "p1": "Have a question or a suggestion to improve the website? We'd love to hear from you! Please open an issue on our GitHub repository.",
+            "button": "Open a GitHub Issue"
+        }
+    },
+    "auth": {
+        "welcomeBack": "Welcome Back",
+        "createAccount": "Create an Account",
+        "signInToFavorites": "Sign in to access your favorites.",
+        "signUpToFavorites": "Sign up to start saving your favorite journals.",
+        "login": "Login",
+        "logout": "Logout",
+        "register": "Register",
+        "orContinueWith": "Or",
+        "email": "Email",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "passwordsDoNotMatch": "Passwords do not match.",
+        "forgotPassword": "Forgot Password?",
+        "nickname": "Nickname",
+        "nicknamePlaceholder": "e.g. Jane Doe",
+        "nicknameRequired": "Nickname must be at least 2 characters.",
+        "googleSignInFailed": "Google Sign-In Failed",
+        "unknownError": "An unknown error occurred.",
+        "loginFailed": "Login Failed",
+        "registrationFailed": "Registration Failed",
+        "checkCredentials": "Please check your credentials and try again.",
+        "reset": {
+            "title": "Reset Password",
+            "description": "Enter your email address and we will send you a link to reset your password.",
+            "button": "Send Reset Email",
+            "backToLogin": "Back to Login",
+            "successTitle": "Password Reset Email Sent",
+            "successDescription": "Please check your inbox for a password reset link.",
+            "errorTitle": "Error"
+        },
+        "verification": {
+            "emailSentTitle": "Verification Email Sent",
+            "emailSentDescription": "A verification link has been sent to your email address. Please check your inbox."
+        },
+        "changeEmail": {
+            "menuItem": "Change Email",
+            "title": "Change Your Email Address",
+            "description": "Your current email is {{email}}. A verification link will be sent to the new address. You must click the link to confirm the change.",
+            "newEmailLabel": "New Email Address",
+            "submitButton": "Update Email",
+            "successTitle": "Verification Email Sent",
+            "successDescription": "A link to verify your new email address has been sent to {{email}}. Please check your inbox.",
+            "errorTitle": "Error Changing Email",
+            "invalidEmail": "Please enter a valid email address."
+        },
+        "changePassword": {
+            "menuItem": "Change Password",
+            "title": "Change Your Password",
+            "description": "We will send a password reset link to your email address ({{email}}). Click the link in the email to set a new password.",
+            "submitButton": "Send Reset Email",
+            "successDescription": "A password reset link has been sent to {{email}}. Please check your inbox.",
+            "errorTitle": "Error Changing Password",
+            "noEmailError": "No email address is associated with this account."
+        },
+        "changeNickname": {
+            "menuItem": "Change Nickname",
+            "title": "Change Your Nickname",
+            "description": "Your current nickname is '{{nickname}}'.",
+            "noNicknameDescription": "You don't have a nickname set yet.",
+            "newNicknameLabel": "New Nickname",
+            "submitButton": "Update Nickname",
+            "successTitle": "Nickname Updated",
+            "successDescription": "Your nickname has been successfully updated.",
+            "errorTitle": "Error Updating Nickname"
+        },
+        "changeAvatar": {
+            "menuItem": "Change Avatar",
+            "title": "Change Avatar",
+            "description": "Select a predefined avatar or upload your own.",
+            "predefined": "Select from predefined",
+            "uploadButton": "Upload an Image",
+            "successTitle": "Avatar Updated",
+            "errorTitle": "Error Updating Avatar"
+        }
+    },
+    "yes": "Yes",
+    "no": "No",
+    "common": {
+        "cancel": "Cancel",
+        "save": "Save",
+        "exportCsv": "Export as CSV",
+        "error": "Error"
+    },
+    "batchEdit": {
+        "button": "Batch Edit",
+        "selectAll": "Select All",
+        "deselectAll": "Deselect All",
+        "selected": "{{count}} selected",
+        "move": {
+            "button": "Move to...",
+            "title": "Move {{count}} journals to...",
+            "successTitle": "Journals Moved",
+            "successDescription": "Successfully moved {{count}} journals.",
+            "errorDescription": "An error occurred while moving the journals."
+        },
+        "remove": {
+            "button": "Delete",
+            "confirmTitle_one": "Remove 1 journal?",
+            "confirmTitle_other": "Remove {{count}} journals?",
+            "confirmDescription": "This will remove the selected journals from the list '{{listName}}'. This action cannot be undone.",
+            "successTitle": "Journals Removed",
+            "successDescription_one": "1 journal has been removed from the list.",
+            "successDescription_other": "{{count}} journals have been removed from the list.",
+            "errorTitle": "Error Removing Journals",
+            "errorDescription": "An error occurred while removing the journals."
+        },
+        "add": {
+            "button": "Add to Lists",
+            "title": "Add {{count}} journals to...",
+            "successTitle": "Journals Added",
+            "successDescription": "Successfully added {{count}} journals to your favorites.",
+            "errorDescription": "An error occurred while adding the journals."
+        },
+        "favorite": {
+            "editButton": "Batch Favorite"
+        }
+    }
+}
