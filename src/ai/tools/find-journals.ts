@@ -6,7 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { journals, Journal } from '@/data/journals';
+import { getDefaultJournals, Journal } from '@/data/journals';
 
 const FindJournalsInputSchema = z.object({
   query: z.string().describe('The search query for journals. Can be a topic, category, or partial name.'),
@@ -28,7 +28,7 @@ export const findJournalsTool = ai.defineTool(
     const { query } = input;
     const lowercasedQuery = query.toLowerCase();
 
-    const allJournals = journals;
+    const allJournals = getDefaultJournals();
 
     const filteredJournals = allJournals.filter((journal: Journal) => {
         const inName = journal.journalName.toLowerCase().includes(lowercasedQuery);

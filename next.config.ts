@@ -8,6 +8,12 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  outputFileTracingIncludes: {
+    '/**/*': [
+      './src/data/editions/editions.json.gz',
+      './public/data/editions.json.gz',
+    ],
+  },
   images: {
     remotePatterns: [
       {

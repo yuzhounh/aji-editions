@@ -1,7 +1,6 @@
 'use server';
 
 import type { Journal } from '@/data/journals';
-import { getEditionById } from '@/data/journals';
 import {
   summarizeJournalInfo,
   type SummarizeJournalInfoOutput,
