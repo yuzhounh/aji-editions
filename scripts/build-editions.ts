@@ -4,7 +4,7 @@
  * Usage:
  *   npm run build:editions
  *   npm run build:editions -- --download
- *   npm run build:editions -- --edition xr-2026
+ *   npm run build:editions -- --edition aji-2026
  */
 import { buildEditions } from "./journal-builder";
 

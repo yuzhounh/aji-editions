@@ -8,6 +8,7 @@ import {
   EDITION_DEFINITIONS,
   type EditionDefinition,
 } from "../src/data/edition-config";
+import { combineIssnParts, normalizeIssnPart } from "../src/lib/issn";
 
 const ROOT = path.resolve(__dirname, "..");
 const RAW_DIR = path.join(ROOT, "data", "raw");
@@ -21,7 +22,7 @@ const SHOWJCR_RAW_BASE =
 
 const OPENALEX_MAILTO = "aji-editions@build.local";
 const OPENALEX_CACHE_PATH = path.join(ROOT, "data", "cache", "openalex-oa-by-issn.json");
-const CAS_OA_SOURCE_EDITION_ID = "cas-2025";
+const CAS_OA_SOURCE_EDITION_ID = "aji-2025";
 
 type OaFields = {
   openAccess: string;
@@ -38,7 +39,14 @@ type OpenAlexOaCache = Record<string, boolean>;
 type CsvRow = Record<string, string>;
 
 function issnsFromCombined(value: string): string[] {
-  return [...new Set(value.split("/").map((part) => part.trim()).filter(Boolean))];
+  return [
+    ...new Set(
+      value
+        .split("/")
+        .map((part) => normalizeIssnPart(part))
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function buildOpenAccessLookup(rows: CsvRow[]): OpenAccessLookup {
@@ -253,7 +261,7 @@ function loadCas2025PartitionRows(): CsvRow[] {
     throw new Error(`Missing edition definition: ${CAS_OA_SOURCE_EDITION_ID}`);
   }
 
-  const casPath = path.join(RAW_DIR, casDefinition.partitionFile);
+  const casPath = path.join(RAW_DIR, casDefinition.partitionFile!);
   if (!fs.existsSync(casPath)) {
     throw new Error(
       `Missing ${casDefinition.partitionFile} required for XR open-access enrichment. Run a full build or download raw files first.`
@@ -275,9 +283,9 @@ async function ensureCas2025RawForXr(
   );
   if (!casDefinition) return;
 
-  const target = path.join(RAW_DIR, casDefinition.partitionFile);
+  const target = path.join(RAW_DIR, casDefinition.partitionFile!);
   if (forceDownload || !fs.existsSync(target)) {
-    await downloadRawFile(casDefinition.partitionFile);
+    await downloadRawFile(casDefinition.partitionFile!);
   }
 }
 
@@ -331,7 +339,10 @@ function calculateAuthorityLevel(
 
 function splitIssn(value: string): { issn: string; eissn: string } {
   const [issn = "", eissn = ""] = value.split("/");
-  return { issn: issn.trim(), eissn: eissn.trim() };
+  return {
+    issn: normalizeIssnPart(issn),
+    eissn: normalizeIssnPart(eissn),
+  };
 }
 
 function collectMinorCategories(row: CsvRow): Journal["minorCategories"] {
@@ -385,7 +396,8 @@ function normalizeCasPartitionRows(rows: CsvRow[]): CsvRow[] {
   return rows
     .map((row) => {
       const issnCombined =
-        row["ISSN/EISSN"]?.trim() || row.ISSN?.trim() || "";
+        row["ISSN/EISSN"]?.trim() ||
+        combineIssnParts(row.ISSN, row.EISSN ?? row.eISSN);
 
       const normalized: CsvRow = {
         Journal: row.Journal?.trim() ?? "",
@@ -418,10 +430,7 @@ function normalizeXrPartitionRows(rows: CsvRow[]): CsvRow[] {
 
   return rows
     .map((row) => {
-      const issn = row.ISSN?.trim() ?? "";
-      const eissn = row.EISSN?.trim() ?? "";
-      const issnCombined =
-        issn && eissn ? `${issn}/${eissn}` : issn || eissn;
+      const issnCombined = combineIssnParts(row.ISSN, row.EISSN);
 
       const normalized: CsvRow = {
         Journal: row.Journal?.trim() || row.刊名?.trim() || "",
@@ -488,7 +497,7 @@ function rowToJournal(row: CsvRow): Journal | null {
 
 function findIfColumn(jcrRows: CsvRow[]): { column: string; year: number } {
   const headers = Object.keys(jcrRows[0] ?? {});
-  const ifHeader = headers.find((header) => /IF\(\d{4}\)/.test(header));
+  const ifHeader = headers.find((header) => /IF\s*\(\d{4}\)/i.test(header));
 
   if (!ifHeader) {
     throw new Error("Could not find IF(YYYY) column in JCR CSV.");
@@ -520,8 +529,8 @@ function buildImpactFactorLookup(jcrRows: CsvRow[]): {
     const journalName = row.Journal?.trim().toUpperCase();
     if (journalName) byName.set(journalName, impactFactor);
 
-    const issn = row.ISSN?.trim();
-    const eissn = row.eISSN?.trim();
+    const issn = normalizeIssnPart(row.ISSN);
+    const eissn = normalizeIssnPart(row.EISSN ?? row.eISSN);
     if (issn) byIssn.set(issn, impactFactor);
     if (eissn) byIssn.set(eissn, impactFactor);
   }
@@ -711,6 +720,54 @@ function buildFromRaw(partitionRows: CsvRow[], jcrRows: CsvRow[]): Journal[] {
   return journals;
 }
 
+function jcrRowToJournal(
+  row: CsvRow,
+  ifColumn: string,
+  ifYear: number
+): Journal | null {
+  const journalName = row.Journal?.trim();
+  if (!journalName) return null;
+
+  const issnCombined = combineIssnParts(row.ISSN, row.EISSN ?? row.eISSN);
+  const impactFactor = parseImpactFactor(getRowValue(row, ifColumn));
+  if (impactFactor === "") return null;
+
+  return {
+    journalName,
+    year: ifYear,
+    issn: issnCombined,
+    review: "否",
+    oaj: "否",
+    openAccess: "否",
+    webOfScience: row["Web of Science"]?.trim() ?? "",
+    impactFactor,
+    annotation: "",
+    majorCategory: "",
+    majorCategoryPartition: "",
+    top: "否",
+    authorityJournal: "",
+    minorCategories: [],
+  };
+}
+
+function buildFromJcrOnly(jcrRows: CsvRow[]): Journal[] {
+  const { column: ifColumn, year: ifYear } = findIfColumn(jcrRows);
+  const journals: Journal[] = [];
+
+  for (const row of jcrRows) {
+    const journal = jcrRowToJournal(row, ifColumn, ifYear);
+    if (journal) journals.push(journal);
+  }
+
+  journals.sort((a, b) => {
+    const ifA = impactFactorSortValue(a.impactFactor);
+    const ifB = impactFactorSortValue(b.impactFactor);
+    return ifB - ifA;
+  });
+
+  return journals;
+}
+
 async function downloadRawFile(filename: string): Promise<void> {
   const target = path.join(RAW_DIR, filename);
   const url = `${SHOWJCR_RAW_BASE}/${encodeURIComponent(filename)}`;
@@ -735,7 +792,9 @@ async function ensureRawFiles(
 
   const filenames = new Set<string>();
   for (const definition of definitions) {
-    filenames.add(definition.partitionFile);
+    if (definition.partitionFile) {
+      filenames.add(definition.partitionFile);
+    }
     filenames.add(definition.impactFactorFile);
   }
 
@@ -745,6 +804,35 @@ async function ensureRawFiles(
       await downloadRawFile(filename);
     }
   }
+}
+
+async function buildJcrOnlyEditionDataset(
+  definition: EditionDefinition,
+  jcrRows: CsvRow[]
+): Promise<JournalDataset> {
+  const journals = buildFromJcrOnly(jcrRows);
+
+  console.log(
+    `[${definition.id}] ${journals.length} journals, ${journals.length} with impact factor`
+  );
+
+  return {
+    id: definition.id,
+    label: definition.label,
+    shortLabel: definition.shortLabel,
+    version: "1.0",
+    partitionYear: definition.partitionYear,
+    partitionType: definition.partitionType,
+    partitionReleaseDate: definition.partitionReleaseDate,
+    impactFactorYear: definition.impactFactorYear,
+    impactFactorReleaseDate: definition.impactFactorReleaseDate,
+    source: {
+      impactFactor: definition.impactFactorFile,
+    },
+    generatedAt: new Date().toISOString(),
+    journalCount: journals.length,
+    journals,
+  };
 }
 
 async function buildEditionDataset(
@@ -799,14 +887,18 @@ function loadExistingCollection(): EditionsCollection | null {
 
 function mergeEditionBuilds(
   built: JournalDataset[],
-  existing: EditionsCollection | null
+  existing: EditionsCollection | null,
+  activeEditionIds: Set<string>
 ): JournalDataset[] {
-  if (!existing) return built;
-
   const builtById = new Map(built.map((edition) => [edition.id, edition]));
-  const merged = existing.editions.map(
-    (edition) => builtById.get(edition.id) ?? edition
-  );
+
+  if (!existing) {
+    return built;
+  }
+
+  const merged = existing.editions
+    .filter((edition) => activeEditionIds.has(edition.id))
+    .map((edition) => builtById.get(edition.id) ?? edition);
 
   for (const edition of built) {
     if (!merged.some((item) => item.id === edition.id)) {
@@ -852,21 +944,32 @@ export async function buildEditions(options: {
   const editions: JournalDataset[] = [];
 
   for (const definition of definitions) {
-    const partitionPath = path.join(RAW_DIR, definition.partitionFile);
     const jcrPath = path.join(RAW_DIR, definition.impactFactorFile);
-
-    console.log(`Building ${definition.id}...`);
-    const partitionRows = parseCsv(fs.readFileSync(partitionPath, "utf8"));
     const jcrRows = parseCsv(fs.readFileSync(jcrPath, "utf8"));
 
+    console.log(`Building ${definition.id}...`);
+
+    if (definition.partitionType === "jcr-only") {
+      editions.push(await buildJcrOnlyEditionDataset(definition, jcrRows));
+      continue;
+    }
+
+    const partitionPath = path.join(RAW_DIR, definition.partitionFile!);
+    const partitionRows = parseCsv(fs.readFileSync(partitionPath, "utf8"));
     editions.push(await buildEditionDataset(definition, partitionRows, jcrRows));
   }
+
+  const activeEditionIds = new Set(definitions.map((definition) => definition.id));
 
   const collection: EditionsCollection = {
     version: "1.0",
     generatedAt: new Date().toISOString(),
     defaultEditionId: DEFAULT_EDITION_ID,
-    editions: mergeEditionBuilds(editions, loadExistingCollection()),
+    editions: mergeEditionBuilds(
+      editions,
+      loadExistingCollection(),
+      activeEditionIds
+    ),
   };
 
   writeCollection(collection);

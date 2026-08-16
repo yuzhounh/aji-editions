@@ -19,9 +19,10 @@ import { BookText, LogIn, Pencil, Trash2, Upload, FolderPlus, Search } from "luc
 import CategoryStats from "../search/CategoryStats";
 import DeleteJournalListDialog from "./DeleteJournalListDialog";
 import RenameJournalListDialog from "./RenameJournalListDialog";
+import CreateJournalListDialog from "./CreateJournalListDialog";
 import Papa from "papaparse";
 import { useToast } from "@/hooks/use-toast";
-import CreateJournalListDialog from "./CreateJournalListDialog";
+import { getPrimaryIssn } from "@/lib/issn";
 
 export type JournalList = {
     name: string;
@@ -80,7 +81,7 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
         if (allFavorites.length === 0) {
             setJournalsForStats([]);
         } else {
-            const journalMap = new Map(journals.map(j => [j.issn.split('/')[0], j]));
+            const journalMap = new Map(journals.map(j => [getPrimaryIssn(j.issn), j]));
             const uniqueJournalIds = new Set<string>();
             allFavorites.forEach(fav => {
                 uniqueJournalIds.add(fav.journalId);
@@ -118,7 +119,7 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
             skipEmptyLines: true,
             complete: async (results) => {
                 const importedJournals = results.data as { "ISSN/EISSN": string }[];
-                const journalIssns = new Set(importedJournals.map(j => j["ISSN/EISSN"]?.split('/')[0]).filter(Boolean));
+                const journalIssns = new Set(importedJournals.map(j => getPrimaryIssn(j["ISSN/EISSN"] ?? "")).filter(Boolean));
 
                 let listName = file.name.replace(/\.csv$/, '').replace(/_/g, ' ');
                 const existingNames = new Set((journalLists || []).map(l => l.name));
@@ -127,7 +128,7 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
                 }
 
                 try {
-                    const journalMapByIssn = new Map(journals.map(j => [j.issn.split('/')[0], j]));
+                    const journalMapByIssn = new Map(journals.map(j => [getPrimaryIssn(j.issn), j]));
                     const validJournalIds = Array.from(journalIssns).filter(issn => journalMapByIssn.has(issn));
                     
                     const listRef = await addDoc(collection(firestore, `users/${user.uid}/journal_lists`), {

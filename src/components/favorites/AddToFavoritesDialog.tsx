@@ -31,7 +31,8 @@ import { Journal } from "@/data/journals";
 import { JournalList } from "./FavoritesContent";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "@/i18n/provider";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { getPrimaryIssn } from "@/lib/issn";
 
 interface AddToFavoritesDialogProps {
   open: boolean;
@@ -54,6 +55,7 @@ export default function AddToFavoritesDialog({
 }: AddToFavoritesDialogProps) {
   const { user, firestore } = useFirebase();
   const { t } = useTranslation();
+  const { toast } = useToast();
   const [newList, setNewList] = useState("");
   const [selectedLists, setSelectedLists] = useState<Set<string>>(new Set());
   const [isCreating, setIsCreating] = useState(false);
@@ -61,7 +63,7 @@ export default function AddToFavoritesDialog({
 
   const isBatchOperation = batchJournals.length > 0;
   const journalsToProcess = isBatchOperation ? batchJournals : [journal];
-  const journalIdsToProcess = journalsToProcess.map(j => j.issn.split('/')[0]);
+  const journalIdsToProcess = journalsToProcess.map(j => getPrimaryIssn(j.issn));
 
   const journalListsQuery = useMemoFirebase(
     () =>
@@ -80,7 +82,7 @@ export default function AddToFavoritesDialog({
       user && firestore && !isBatchOperation
         ? query(
             collection(firestore, `users/${user.uid}/favorite_journals`),
-            where("journalId", "==", journal.issn.split('/')[0])
+            where("journalId", "==", getPrimaryIssn(journal.issn))
           )
         : null,
     [user, firestore, journal, isBatchOperation]

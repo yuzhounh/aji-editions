@@ -153,7 +153,9 @@
         "switcherLabel": "选择数据版本",
         "currentLabel": "当前版本",
         "loading": "正在加载版本数据...",
-        "loadError": "版本数据加载失败。"
+        "loadError": "版本数据加载失败。",
+        "jcrOnlyNote": "仅含 JCR 影响因子，暂无分区数据。",
+        "jcrOnlyBrowseUnavailable": "此版本仅提供 JCR 影响因子，暂不支持按学科浏览。"
     },
     "about": {
         "title": "关于 AJI Editions",
@@ -168,6 +170,7 @@
         "dataCas": "中科院分区表",
         "dataXr": "新锐分区表",
         "editionRelease": "发布于 {{date}}",
+        "editionPendingRelease": "待发布",
         "linksTitle": "相关链接",
         "links": {
             "jcr": "期刊引证报告 | 科睿唯安",

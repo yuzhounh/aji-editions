@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/select";
 import { useEdition } from "@/contexts/EditionContext";
 import { useTranslation } from "@/i18n/provider";
+import { sortEditionsByYearDesc } from "@/data/edition-utils";
 import { getEditionDisplayLabel } from "@/lib/edition-label";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ function EditionOption({
     label: { zh: string; en: string };
     impactFactorYear: number;
     partitionYear: number;
-    partitionType: "cas" | "xr";
+    partitionType: "cas" | "xr" | "jcr-only";
   };
   locale: "zh" | "en";
   compact?: boolean;
@@ -72,6 +73,7 @@ export default function EditionSwitcher({
 }: EditionSwitcherProps) {
   const { editions, currentEditionId, setEditionId } = useEdition();
   const { locale, t } = useTranslation();
+  const sortedEditions = sortEditionsByYearDesc(editions);
   const currentEdition = editions.find((edition) => edition.id === currentEditionId);
 
   return (
@@ -101,7 +103,7 @@ export default function EditionSwitcher({
         </SelectValue>
       </SelectTrigger>
       <SelectContent align="end">
-        {editions.map((edition) => (
+        {sortedEditions.map((edition) => (
           <SelectItem
             key={edition.id}
             value={edition.id}

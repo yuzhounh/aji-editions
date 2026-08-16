@@ -1,10 +1,19 @@
 type EditionLabelSource = {
   impactFactorYear: number;
   partitionYear: number;
-  partitionType: "cas" | "xr";
+  partitionType: "cas" | "xr" | "jcr-only";
 };
 
+/** Clarivate JCR release edition year (IF data year + 1). */
+export function getJcrReleaseYear(impactFactorYear: number): number {
+  return impactFactorYear + 1;
+}
+
 export function getEditionDisplayLabel(edition: EditionLabelSource): string {
-  const partitionTag = edition.partitionType === "xr" ? "XR" : "CAS";
-  return `IF ${edition.impactFactorYear} · ${partitionTag} ${edition.partitionYear}`;
+  if (edition.partitionType === "jcr-only") {
+    return `JCR ${getJcrReleaseYear(edition.impactFactorYear)}`;
+  }
+
+  const tag = edition.partitionType === "xr" ? "XR" : "CAS";
+  return `JCR ${getJcrReleaseYear(edition.impactFactorYear)} · ${tag} ${edition.partitionYear}`;
 }

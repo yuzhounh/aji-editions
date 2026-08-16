@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { getEditionById } from '@/data/journals';
 import type { Journal } from '@/data/journals';
 import { deepseekChatJson, parseDeepSeekJson } from '@/ai/deepseek';
+import { getPrimaryIssn } from '@/lib/issn';
 
 const SummarizeJournalInfoInputSchema = z.object({
   journalName: z.string().describe('The name of the journal.'),
@@ -113,12 +114,12 @@ Additionally, based on your own knowledge, recommend 6-9 related journals. Popul
   // This prevents showing related journals that the user can't navigate to.
   const edition = getEditionById(editionId);
   const editionJournals = edition?.journals ?? [];
-  const journalMapByIssn = new Map(editionJournals.map(j => [j.issn.split('/')[0], j]));
+  const journalMapByIssn = new Map(editionJournals.map(j => [getPrimaryIssn(j.issn), j]));
 
   const validatedRelatedJournals = output.relatedJournals
     .map(suggestedJournal => {
       // AI might return an ISSN with a slash or extra characters. We only care about the primary part.
-      const suggestedIssnPrefix = suggestedJournal.issn.split('/')[0];
+      const suggestedIssnPrefix = getPrimaryIssn(suggestedJournal.issn);
       const foundJournal = journalMapByIssn.get(suggestedIssnPrefix);
 
       // If we found a matching journal in our local data, use our data's name and full ISSN.

@@ -215,7 +215,9 @@
         "switcherLabel": "Select dataset edition",
         "currentLabel": "Current edition",
         "loading": "Loading edition data...",
-        "loadError": "Failed to load edition data."
+        "loadError": "Failed to load edition data.",
+        "jcrOnlyNote": "JCR impact factors only; partition data not yet available.",
+        "jcrOnlyBrowseUnavailable": "This edition provides JCR impact factors only. Category browse is not available."
     },
     "about": {
         "title": "About AJI Editions",
@@ -230,6 +232,7 @@
         "dataCas": "CAS Partition Table",
         "dataXr": "XR Partition Table",
         "editionRelease": "Released {{date}}",
+        "editionPendingRelease": "Pending release",
         "linksTitle": "Related Links",
         "links": {
             "jcr": "Journal Citation Reports | Clarivate",

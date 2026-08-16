@@ -1,14 +1,17 @@
 "use client";
 
 import { useEdition } from "@/contexts/EditionContext";
+import { editionHasPartition } from "@/data/edition-utils";
 import { useTranslation } from "@/i18n/provider";
 
 export function usePartitionTerminology() {
   const { currentEdition } = useEdition();
   const { t } = useTranslation();
+  const hasPartition = editionHasPartition(currentEdition);
   const isXr = currentEdition.partitionType === "xr";
 
   return {
+    hasPartition,
     isXr,
     /** Translation namespace for partition tooltips and shared partition strings. */
     ns: isXr ? ("xr" as const) : ("cas" as const),

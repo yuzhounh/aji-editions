@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { ExternalLink, Mail, Github, Users, BookOpen, Search, Book, Heart, Bot, MessageSquare, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/i18n/provider';
 import { useEdition } from '@/contexts/EditionContext';
+import { getJcrReleaseYear } from '@/lib/edition-label';
+import { editionHasPartition } from '@/data/edition-utils';
 
 const linkDefs = [
   {
@@ -43,6 +45,15 @@ const linkDefs = [
     href: 'https://github.com/yuzhounh/academic-journal-index',
   },
 ] as const;
+
+function EditionDataRow({ label, status }: { label: string; status: string }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_10.75rem] items-baseline gap-x-3">
+      <span>{label}</span>
+      <span className="font-mono">— {status}</span>
+    </div>
+  );
+}
 
 const FeatureCard = ({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) => (
     <Card>
@@ -144,8 +155,15 @@ export default function AboutPage() {
             <p>{t('about.dataSourceIntro')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {editionsNewestFirst.map((edition) => {
+                const hasPartition = editionHasPartition(edition);
                 const partitionLabel =
                   edition.partitionType === 'xr' ? t('about.dataXr') : t('about.dataCas');
+                const pendingPartitionLabel =
+                  edition.pendingPartitionType === 'xr'
+                    ? t('about.dataXr')
+                    : edition.pendingPartitionType === 'cas'
+                      ? t('about.dataCas')
+                      : null;
                 const isActive = edition.id === currentEditionId;
 
                 return (
@@ -166,22 +184,23 @@ export default function AboutPage() {
                       {isActive && <Badge variant="secondary">{t('edition.currentLabel')}</Badge>}
                     </div>
                     <div className="mt-2 space-y-1 text-sm text-muted-foreground">
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span>
-                          {t('about.dataJcr')} {edition.impactFactorYear}
-                        </span>
-                        <span className="shrink-0 text-right font-mono">
-                          — {t('about.editionRelease', { date: edition.impactFactorReleaseDate })}
-                        </span>
-                      </div>
-                      <div className="flex items-baseline justify-between gap-3">
-                        <span>
-                          {partitionLabel} {edition.partitionYear}
-                        </span>
-                        <span className="shrink-0 text-right font-mono">
-                          — {t('about.editionRelease', { date: edition.partitionReleaseDate })}
-                        </span>
-                      </div>
+                      <EditionDataRow
+                        label={`${t('about.dataJcr')} ${getJcrReleaseYear(edition.impactFactorYear)}`}
+                        status={t('about.editionRelease', { date: edition.impactFactorReleaseDate })}
+                      />
+                      {hasPartition ? (
+                        <EditionDataRow
+                          label={`${partitionLabel} ${edition.partitionYear}`}
+                          status={t('about.editionRelease', { date: edition.partitionReleaseDate })}
+                        />
+                      ) : pendingPartitionLabel ? (
+                        <EditionDataRow
+                          label={`${pendingPartitionLabel} ${edition.partitionYear}`}
+                          status={t('about.editionPendingRelease')}
+                        />
+                      ) : (
+                        <p>{t('edition.jcrOnlyNote')}</p>
+                      )}
                     </div>
                   </button>
                 );

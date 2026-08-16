@@ -1,0 +1,37 @@
+---
+description: Never start a second copy of a long-running job that is already running (benchmarks, Ollama, batch generation).
+alwaysApply: true
+---
+
+# No duplicate long-running jobs
+
+Before starting any long-running command (benchmarks, Ollama inference, batch AI generation, multi-minute builds):
+
+1. Inspect existing terminals and running processes for the same command (or the same script/backend).
+2. If a match is already running: do **not** start another. Attach to that terminal, poll it, or resume from its checkpoint only.
+
+## Shell auto-background is not failure
+
+A command auto-backgrounded after ~30s (no `done` yet) is still running. Ollama warmup, first-token delay, and silent GPU load are expected. Wait/poll **that** terminal. Never re-invoke because it was backgrounded.
+
+## Local GPU / Ollama
+
+At most **one** local inference process (Ollama / qwen / this machine's GPU). Never concurrency > 1 across processes. DeepSeek API concurrency **inside a single process** is OK.
+
+## Checkpoints
+
+Files such as `data/cache/summary-benchmark/qwen.json` are for crash-resume of **the same** run. They are not a license to start a second run while the first is alive.
+
+## Forked / Start Multitasking agents
+
+Continue existing work. Do not spawn a duplicate of a job the parent (or another agent) already started.
+
+## Example (this repo)
+
+```
+# BAD — first run still warming Ollama; second copy doubles GPU load and races the checkpoint
+npx tsx scripts/sample-summary-benchmark.ts --backend qwen   # already running
+npx tsx scripts/sample-summary-benchmark.ts --backend qwen   # DO NOT start this
+
+# GOOD — poll the existing terminal; resume from checkpoint only if that process is dead
+```

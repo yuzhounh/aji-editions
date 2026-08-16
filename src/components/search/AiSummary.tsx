@@ -6,9 +6,10 @@ import { getSummary } from "@/app/actions";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { JournalSummaryInfo } from "@/app/actions";
 import { useTranslation } from "@/i18n/provider";
+import { useEdition } from "@/contexts/EditionContext";
 import { BookCopy } from "lucide-react";
 import JournalListItem from "./JournalListItem";
-import { useEdition } from "@/contexts/EditionContext";
+import { getPrimaryIssn } from "@/lib/issn";
 import ContentBlockRenderer from "./ContentBlockRenderer";
 
 interface AiSummaryProps {
@@ -67,9 +68,9 @@ export default function AiSummary({ journal, onJournalSelect }: AiSummaryProps) 
     return <p className="text-destructive">{error}</p>;
   }
 
-  const relatedJournalsMap = new Map(journals.map(j => [j.issn.split('/')[0], j]));
+  const relatedJournalsMap = new Map(journals.map(j => [getPrimaryIssn(j.issn), j]));
   const fullRelatedJournals = (summaryInfo?.relatedJournals || [])
-    .map(rj => relatedJournalsMap.get(rj.issn.split('/')[0]))
+    .map(rj => relatedJournalsMap.get(getPrimaryIssn(rj.issn)))
     .filter((j): j is Journal => !!j);
 
 

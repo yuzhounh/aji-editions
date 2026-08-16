@@ -65,6 +65,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useEdition } from "@/contexts/EditionContext";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
+import { editionHasPartition } from "@/data/edition-utils";
+import { getPrimaryIssn } from "@/lib/issn";
 import EditionSwitcher from "@/components/edition/EditionSwitcher";
 
 const JOURNALS_PER_PAGE = 20;
@@ -187,8 +189,8 @@ const triggerCsvDownload = (data: (string | number)[][], filename: string) => {
 
 
 export default function CategoryPage() {
-  const { journals, currentEditionId } = useEdition();
-  const { exportPartitionHeader } = usePartitionTerminology();
+  const { journals, currentEditionId, currentEdition } = useEdition();
+  const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [journalHistory, setJournalHistory] = useState<Journal[]>([]);
   const [selectedJournalList, setSelectedJournalList] = useState<WithId<JournalList> | null>(null);
@@ -222,6 +224,12 @@ export default function CategoryPage() {
     setSelectedJournals(new Set());
   }, [currentEditionId]);
 
+  React.useEffect(() => {
+    if (!editionHasPartition(currentEdition) && view === "categories") {
+      setView("search");
+    }
+  }, [currentEdition, view]);
+
   const categories = useMemo(() => {
     const categoryCounts: { [key: string]: number } = {};
     journals.forEach((journal) => {
@@ -239,7 +247,7 @@ export default function CategoryPage() {
     );
   }, [categories]);
 
-  const journalMap = useMemo(() => new Map(journals.map(j => [j.issn.split('/')[0], j])), [journals]);
+  const journalMap = useMemo(() => new Map(journals.map(j => [getPrimaryIssn(j.issn), j])), [journals]);
 
   // For Favorites view - get all favorite journal IDs first
   const allFavoritesQuery = useMemoFirebase(
@@ -331,7 +339,7 @@ export default function CategoryPage() {
       setPreservedSearchTerm(searchTerm);
     }
     if (isEditing) {
-        handleSelectionChange(journal.issn.split('/')[0], !selectedJournals.has(journal.issn.split('/')[0]));
+        handleSelectionChange(getPrimaryIssn(journal.issn), !selectedJournals.has(getPrimaryIssn(journal.issn)));
     } else {
         setJournalHistory([journal]);
     }
@@ -385,7 +393,7 @@ export default function CategoryPage() {
   const handleExport = () => {
     const isExportingSelection = isEditing && selectedJournals.size > 0;
     const journalsForExport = isExportingSelection
-      ? journalsToDisplay.filter(j => selectedJournals.has(j.issn.split('/')[0]))
+      ? journalsToDisplay.filter(j => selectedJournals.has(getPrimaryIssn(j.issn)))
       : journalsToDisplay;
 
     if (journalsForExport.length === 0) return;
@@ -397,15 +405,24 @@ export default function CategoryPage() {
       filename = `${isExportingSelection ? 'Selected-' : ''}Category-${selectedCategory.replace(/\s+/g, '_')}.csv`;
     }
 
-    const headers = ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"];
-    const data = journalsForExport.map(j => [
-        j.journalName,
-        j.issn,
-        j.impactFactor,
-        j.majorCategoryPartition,
-        j.authorityJournal,
-        j.openAccess
-    ]);
+    const headers = hasPartition
+      ? ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"]
+      : ["Journal Name", "ISSN/EISSN", "Impact Factor", "Open Access"];
+    const data = journalsForExport.map(j => hasPartition
+      ? [
+          j.journalName,
+          j.issn,
+          j.impactFactor,
+          j.majorCategoryPartition,
+          j.authorityJournal,
+          j.openAccess,
+        ]
+      : [
+          j.journalName,
+          j.issn,
+          j.impactFactor,
+          j.openAccess,
+        ]);
 
     triggerCsvDownload([headers, ...data], filename);
   };
@@ -428,7 +445,7 @@ export default function CategoryPage() {
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      const allJournalIds = new Set(journalsToDisplay.map(j => j.issn.split('/')[0]));
+      const allJournalIds = new Set(journalsToDisplay.map(j => getPrimaryIssn(j.issn)));
       setSelectedJournals(allJournalIds);
     } else {
       setSelectedJournals(new Set());
@@ -633,14 +650,16 @@ export default function CategoryPage() {
           return (
             <div className="animate-in fade-in-50 duration-300">
               {renderListHeader()}
+              {hasPartition && (
               <div className="mb-6">
                 <CategoryStats journals={journalsToDisplay} collapsible defaultOpen={true} />
               </div>
+              )}
               {renderActionToolbar()}
               {paginatedJournals.length > 0 ? (
                 <div className="space-y-2">
                   {paginatedJournals.map((journal) => {
-                    const journalId = journal.issn.split('/')[0];
+                    const journalId = getPrimaryIssn(journal.issn);
                     return (
                         <JournalListItem
                           key={journal.issn}
@@ -676,11 +695,19 @@ export default function CategoryPage() {
         } else { // categories
           return (
             <div className="animate-in fade-in-50 duration-300 space-y-8">
-              <CategoryStats journals={journals} collapsible defaultOpen={true} />
-              <CategoryBrowse
-                categories={sortedCategories}
-                onCategorySelect={handleCategorySelect}
-              />
+              {hasPartition ? (
+                <>
+                  <CategoryStats journals={journals} collapsible defaultOpen={true} />
+                  <CategoryBrowse
+                    categories={sortedCategories}
+                    onCategorySelect={handleCategorySelect}
+                  />
+                </>
+              ) : (
+                <div className="rounded-lg border border-dashed border-border/70 bg-muted/20 p-8 text-center">
+                  <p className="text-muted-foreground">{t("edition.jcrOnlyBrowseUnavailable")}</p>
+                </div>
+              )}
             </div>
           );
         }
@@ -693,7 +720,7 @@ export default function CategoryPage() {
 
   const navViewItems: { id: 'search' | 'categories' | 'favorites' | 'about'; labelKey: string; icon: React.ElementType }[] = [
     { id: 'search', labelKey: 'nav.search', icon: SearchIcon },
-    { id: 'categories', labelKey: 'nav.browse', icon: BookOpen },
+    ...(hasPartition ? [{ id: 'categories' as const, labelKey: 'nav.browse', icon: BookOpen }] : []),
     { id: 'favorites', labelKey: 'nav.favorites', icon: Star },
     { id: 'about', labelKey: 'nav.about', icon: Info },
   ];
@@ -742,7 +769,7 @@ export default function CategoryPage() {
     
     const isFavoritesView = !!selectedJournalList;
     const isBrowseView = view === 'categories' && selectedCategory;
-    const journalsToProcess = journalsToDisplay.filter(j => selectedJournals.has(j.issn.split('/')[0]));
+    const journalsToProcess = journalsToDisplay.filter(j => selectedJournals.has(getPrimaryIssn(j.issn)));
     
     const getDeleteDialogTitle = () => {
         if (selectedJournals.size === 1) {

@@ -26,12 +26,13 @@ export type JournalDataset = {
   shortLabel: { zh: string; en: string };
   version: string;
   partitionYear: number;
-  partitionType: "cas" | "xr";
+  partitionType: "cas" | "xr" | "jcr-only";
+  pendingPartitionType?: "cas" | "xr";
   partitionReleaseDate: string;
   impactFactorYear: number;
   impactFactorReleaseDate: string;
   source: {
-    partition: string;
+    partition?: string;
     impactFactor: string;
   };
   generatedAt: string;

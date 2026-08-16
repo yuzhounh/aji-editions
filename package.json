@@ -1,6 +1,6 @@
 {
   "name": "aji-editions",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
@@ -8,6 +8,7 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build:journals": "tsx scripts/build-journals.ts",
     "build:editions": "tsx scripts/build-editions.ts",
+    "bench:summaries": "tsx scripts/sample-summary-benchmark.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

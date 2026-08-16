@@ -39,6 +39,7 @@ import { useMemoFirebase } from "@/firebase/provider";
 import { useTranslation } from "@/i18n/provider";
 import { useEdition } from "@/contexts/EditionContext";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
+import { formatIssnDisplay, getPrimaryIssn } from "@/lib/issn";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
 import { collection, query, where, or } from 'firebase/firestore';
 import { Skeleton } from "../ui/skeleton";
@@ -95,13 +96,7 @@ const ApcInfoItem = ({ journalName }: { journalName: string }) => {
     );
 };
 
-const formatIssn = (issn: string) => {
-    const parts = issn.split('/');
-    if (parts.length > 1) {
-        return <>{parts[0]}/<wbr/>{parts.slice(1).join('/')}</>;
-    }
-    return issn;
-};
+const formatIssn = (issn: string) => formatIssnDisplay(issn);
 
 export default function JournalDetail({ journal, onBack, onJournalSelect }: JournalDetailProps) {
   const [showAiAnalysis, setShowAiAnalysis] = useState<boolean>(false);
@@ -114,7 +109,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect }: Jour
   const { partition, description } = usePartitionTerminology();
   const [isFavoritesDialogOpen, setIsFavoritesDialogOpen] = useState(false);
 
-  const journalId = journal.issn.split('/')[0];
+  const journalId = getPrimaryIssn(journal.issn);
 
   const favoritesQuery = useMemoFirebase(
     () =>

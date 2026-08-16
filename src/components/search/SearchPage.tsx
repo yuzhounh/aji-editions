@@ -28,6 +28,7 @@ import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
 import { Card, CardContent } from "../ui/card";
 import { useFirebase } from "@/firebase";
 import { cn } from "@/lib/utils";
+import { getPrimaryIssn } from "@/lib/issn";
 
 const SEARCH_EXAMPLES = ["Nature", "Cell", "Lancet", "IEEE"];
 
@@ -150,7 +151,7 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useFirebase();
   const { t } = useTranslation();
-  const { exportPartitionHeader } = usePartitionTerminology();
+  const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
   const isMobile = useIsMobile();
 
   // Batch edit state
@@ -208,21 +209,30 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
   const handleExport = () => {
     const isExportingSelection = isEditing && selectedJournals.size > 0;
     const journalsForExport = isExportingSelection
-      ? filteredJournals.filter(j => selectedJournals.has(j.issn.split('/')[0]))
+      ? filteredJournals.filter(j => selectedJournals.has(getPrimaryIssn(j.issn)))
       : filteredJournals;
 
     if (journalsForExport.length === 0) return;
     
     const filename = `${isExportingSelection ? 'Selected-' : ''}Search-results-for-${searchTerm.replace(/\s+/g, '_')}.csv`;
-    const headers = ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"];
-    const data = journalsForExport.map(j => [
-        j.journalName,
-        j.issn,
-        j.impactFactor,
-        j.majorCategoryPartition,
-        j.authorityJournal,
-        j.openAccess
-    ]);
+    const headers = hasPartition
+      ? ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"]
+      : ["Journal Name", "ISSN/EISSN", "Impact Factor", "Open Access"];
+    const data = journalsForExport.map(j => hasPartition
+      ? [
+          j.journalName,
+          j.issn,
+          j.impactFactor,
+          j.majorCategoryPartition,
+          j.authorityJournal,
+          j.openAccess,
+        ]
+      : [
+          j.journalName,
+          j.issn,
+          j.impactFactor,
+          j.openAccess,
+        ]);
 
     triggerCsvDownload([headers, ...data], filename);
   };
@@ -245,7 +255,7 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
 
   const handleSelectAll = (checked: boolean | "indeterminate") => {
     if (checked) {
-      const allJournalIds = new Set(filteredJournals.map(j => j.issn.split('/')[0]));
+      const allJournalIds = new Set(filteredJournals.map(j => getPrimaryIssn(j.issn)));
       setSelectedJournals(allJournalIds);
     } else {
       setSelectedJournals(new Set());
@@ -298,7 +308,7 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
   const BatchActionBottomBar = () => {
     if (!isEditing || !user || selectedJournals.size === 0) return null;
 
-    const journalsToFavorite = filteredJournals.filter(j => selectedJournals.has(j.issn.split('/')[0]));
+    const journalsToFavorite = filteredJournals.filter(j => selectedJournals.has(getPrimaryIssn(j.issn)));
 
     return (
       <div className="fixed bottom-0 left-0 right-0 z-50 p-4 animate-in slide-in-from-bottom-12 duration-300">
@@ -390,7 +400,9 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
 
       {filteredJournals.length > 0 && (
         <div className="animate-in fade-in-50 duration-300 space-y-6">
-          <CategoryStats journals={filteredJournals} collapsible defaultOpen={true} />
+          {hasPartition && (
+            <CategoryStats journals={filteredJournals} collapsible defaultOpen={true} />
+          )}
           {renderActionToolbar()}
         </div>
       )}
@@ -403,7 +415,7 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
       {paginatedJournals.length > 0 && (
         <div className="space-y-2 animate-in fade-in-50 duration-300">
           {paginatedJournals.map((journal) => {
-            const journalId = journal.issn.split('/')[0];
+            const journalId = getPrimaryIssn(journal.issn);
             return (
               <JournalListItem
                 key={journal.issn}

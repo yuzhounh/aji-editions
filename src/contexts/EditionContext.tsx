@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { EditionsCollection, Journal, JournalDataset } from "@/data/types";
-import { getLatestEditionIdFromCollection } from "@/data/edition-utils";
+import { getDefaultEditionIdFromCollection } from "@/data/edition-utils";
 import { loadEditionsCollectionClient } from "@/lib/load-editions-client";
 import { useTranslation } from "@/i18n/provider";
 
@@ -30,8 +30,8 @@ function EditionProviderInner({
   collection: EditionsCollection;
   children: React.ReactNode;
 }) {
-  const latestEditionId = getLatestEditionIdFromCollection(collection);
-  const [currentEditionId, setCurrentEditionId] = React.useState(latestEditionId);
+  const defaultEditionId = getDefaultEditionIdFromCollection(collection);
+  const [currentEditionId, setCurrentEditionId] = React.useState(defaultEditionId);
 
   React.useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);

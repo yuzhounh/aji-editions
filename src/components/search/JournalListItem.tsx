@@ -101,7 +101,7 @@ const IssnMetadataRow = ({
 
 export default function JournalListItem({ journal, onClick, isEditing, isSelected, onSelectionChange }: JournalListItemProps) {
   const { t, locale } = useTranslation();
-  const { partitionShort } = usePartitionTerminology();
+  const { partitionShort, hasPartition } = usePartitionTerminology();
 
   const getPartitionText = (partition: string) => {
     if (locale === 'zh') {
@@ -158,6 +158,7 @@ export default function JournalListItem({ journal, onClick, isEditing, isSelecte
                         <p className="font-headline font-semibold text-base tabular-nums leading-none">{formatImpactFactor(journal.impactFactor)}</p>
                     </div>
                 </div>
+                {hasPartition && journal.majorCategoryPartition && (
                 <div className="flex flex-col items-start md:items-end min-w-[56px]">
                     <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none h-4 flex items-center">{partitionShort}</p>
                     <div className="mt-1 h-7 flex items-center">
@@ -166,6 +167,7 @@ export default function JournalListItem({ journal, onClick, isEditing, isSelecte
                         </Badge>
                     </div>
                 </div>
+                )}
             </div>
         </div>
       </CardContent>

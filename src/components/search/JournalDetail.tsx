@@ -39,6 +39,7 @@ import { useMemoFirebase } from "@/firebase/provider";
 import { useTranslation } from "@/i18n/provider";
 import { useEdition } from "@/contexts/EditionContext";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
+import { formatIssnDisplay, getPrimaryIssn } from "@/lib/issn";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
 import { collection, query, where, or } from 'firebase/firestore';
 import { Skeleton } from "../ui/skeleton";
@@ -100,13 +101,7 @@ const ApcInfoItem = ({ journalName }: { journalName: string }) => {
     );
 };
 
-const formatIssn = (issn: string) => {
-    const parts = issn.split('/');
-    if (parts.length > 1) {
-        return <>{parts[0]}/<wbr/>{parts.slice(1).join('/')}</>;
-    }
-    return issn;
-};
+const formatIssn = (issn: string) => formatIssnDisplay(issn);
 
 export default function JournalDetail({ journal, onBack, onJournalSelect, isHistoryRoot }: JournalDetailProps) {
   const [showAiAnalysis, setShowAiAnalysis] = useState<boolean>(false);
@@ -116,10 +111,10 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
   const { user, firestore } = useFirebase();
   const { t, locale } = useTranslation();
   const { currentEditionId } = useEdition();
-  const { partition, description } = usePartitionTerminology();
+  const { partition, description, hasPartition } = usePartitionTerminology();
   const [isFavoritesDialogOpen, setIsFavoritesDialogOpen] = useState(false);
 
-  const journalId = journal.issn.split('/')[0];
+  const journalId = getPrimaryIssn(journal.issn);
   const summaryInfo = summaryCache[journal.issn];
 
   const favoritesQuery = useMemoFirebase(
@@ -212,8 +207,8 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
       </div>
 
       <div className="space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <Card className="lg:col-span-1">
+        <div className={`grid grid-cols-1 ${hasPartition ? "lg:grid-cols-3" : ""} gap-6`}>
+            <Card className={hasPartition ? "lg:col-span-1" : ""}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl font-headline">
                         <BookOpen className="text-primary"/>
@@ -231,6 +226,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
                 </CardContent>
             </Card>
             
+            {hasPartition && (
             <Card className="lg:col-span-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl font-headline">
@@ -243,6 +239,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
                     <CasPartitionDisplay journal={journal} />
                 </CardContent>
             </Card>
+            )}
         </div>
         
         <Card>

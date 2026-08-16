@@ -42,5 +42,6 @@ next-env.d.ts
 !/data/cache/.gitkeep
 /src/data/journals.json
 /src/data/editions/editions.json
+/public/data/editions.json
 
 .vercel
