@@ -25,7 +25,7 @@ import {
   Bot,
   BookCopy,
   Heart,
-  Sparkles,
+  LineChart,
 } from "lucide-react";
 import CasPartitionDisplay from "./CasPartitionDisplay";
 import { Badge } from "../ui/badge";
@@ -41,8 +41,10 @@ import { useEdition } from "@/contexts/EditionContext";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
 import { formatIssnDisplay, getPrimaryIssn } from "@/lib/issn";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
-import { collection, query, where, or } from 'firebase/firestore';
+import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from "../ui/skeleton";
+import JournalHistoryDialog from "./JournalHistoryDialog";
+import { journalHasMultiEditionHistory } from "@/lib/journal-history";
 
 interface JournalDetailProps {
   journal: Journal;
@@ -52,8 +54,12 @@ interface JournalDetailProps {
 }
 
 type SummaryCache = {
-  [journalIssn: string]: JournalSummaryInfo;
+  [cacheKey: string]: JournalSummaryInfo;
 };
+
+function summaryCacheKey(issn: string, locale: string) {
+  return `${issn}:${locale}`;
+}
 
 const formatImpactFactor = (factor: number | string) => {
     const num = Number(factor);
@@ -104,18 +110,20 @@ const ApcInfoItem = ({ journalName }: { journalName: string }) => {
 const formatIssn = (issn: string) => formatIssnDisplay(issn);
 
 export default function JournalDetail({ journal, onBack, onJournalSelect, isHistoryRoot }: JournalDetailProps) {
-  const [showAiAnalysis, setShowAiAnalysis] = useState<boolean>(false);
   const [summaryCache, setSummaryCache] = useState<SummaryCache>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { user, firestore } = useFirebase();
   const { t, locale } = useTranslation();
-  const { currentEditionId } = useEdition();
+  const { currentEditionId, editions } = useEdition();
   const { partition, description, hasPartition } = usePartitionTerminology();
   const [isFavoritesDialogOpen, setIsFavoritesDialogOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const journalId = getPrimaryIssn(journal.issn);
-  const summaryInfo = summaryCache[journal.issn];
+  const showHistoryButton = journalHasMultiEditionHistory(editions, journalId);
+  const cacheKey = summaryCacheKey(journal.issn, locale);
+  const summaryInfo = summaryCache[cacheKey];
 
   const favoritesQuery = useMemoFirebase(
     () =>
@@ -133,35 +141,36 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
   const isFavorited = favoriteEntries ? favoriteEntries.length > 0 : false;
 
   useEffect(() => {
-    // When the journal changes, check if we have a cached summary.
-    // If we do, automatically show the analysis section.
-    if (summaryCache[journal.issn]) {
-      setShowAiAnalysis(true);
-    } else {
-      setShowAiAnalysis(false);
-    }
-  }, [journal, summaryCache]);
-
-  const handleGenerateSummary = async () => {
     if (!journal) return;
-    if (summaryCache[journal.issn]) {
-      setShowAiAnalysis(true);
+
+    if (summaryCache[cacheKey]) {
+      setIsLoading(false);
+      setError(null);
       return;
     }
 
-    setShowAiAnalysis(true);
+    let cancelled = false;
     setIsLoading(true);
     setError(null);
-    try {
-      const result: JournalSummaryInfo = await getSummary(journal, locale, currentEditionId);
-      setSummaryCache(prev => ({...prev, [journal.issn]: result }));
-    } catch (e) {
-      setError(t('journal.summaryError'));
-      console.error(e);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
+    getSummary(journal, locale, currentEditionId)
+      .then((result) => {
+        if (cancelled) return;
+        setSummaryCache((prev) => ({ ...prev, [cacheKey]: result }));
+      })
+      .catch((e) => {
+        if (cancelled) return;
+        setError(t("journal.summaryError"));
+        console.error(e);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [journal, locale, currentEditionId, cacheKey, t]);
 
   const handleFavoriteClick = () => {
     if (!user) {
@@ -183,28 +192,49 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <div className="flex-grow flex items-center gap-4 justify-between">
-          <h2 className="font-headline text-2xl md:text-3xl font-bold tracking-tight">{journal.journalName}</h2>
-          {user && (
-            <>
+        <div className="flex min-w-0 flex-1 items-center gap-3 justify-between">
+          <h2 className="font-headline text-2xl md:text-3xl font-bold tracking-tight min-w-0">
+            {journal.journalName}
+          </h2>
+          <div className="flex shrink-0 items-center gap-2">
+            {showHistoryButton && (
               <Button
-                variant={isFavorited ? "default" : "outline"}
-                size="icon"
-                onClick={handleFavoriteClick}
-                disabled={isFavoriteLoading}
-                aria-label={t('journal.favorite')}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsHistoryOpen(true)}
               >
-                <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
+                <LineChart className="mr-2 h-4 w-4" />
+                {t("journal.viewHistory")}
               </Button>
-              <AddToFavoritesDialog
-                open={isFavoritesDialogOpen}
-                onOpenChange={setIsFavoritesDialogOpen}
-                journal={journal}
-              />
-            </>
-          )}
+            )}
+            {user && (
+              <>
+                <Button
+                  variant={isFavorited ? "default" : "outline"}
+                  size="icon"
+                  onClick={handleFavoriteClick}
+                  disabled={isFavoriteLoading}
+                  aria-label={t('journal.favorite')}
+                >
+                  <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
+                </Button>
+                <AddToFavoritesDialog
+                  open={isFavoritesDialogOpen}
+                  onOpenChange={setIsFavoritesDialogOpen}
+                  journal={journal}
+                />
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      <JournalHistoryDialog
+        journal={journal}
+        open={isHistoryOpen}
+        onOpenChange={setIsHistoryOpen}
+      />
 
       <div className="space-y-6">
         <div className={`grid grid-cols-1 ${hasPartition ? "lg:grid-cols-3" : ""} gap-6`}>
@@ -244,61 +274,44 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
         
         <Card>
             <CardHeader>
-                <div className="flex flex-col md:flex-row md:justify-between md:items-center">
-                    <CardTitle className="flex items-center gap-2 text-xl font-headline">
-                        <Bot className="text-primary"/>
-                        {t('journal.aiSummary')}
-                    </CardTitle>
-                    {!showAiAnalysis && (
-                        <Button
-                          onClick={handleGenerateSummary}
-                          className="bg-primary/10 text-primary hover:bg-primary/20 mt-4 md:mt-0"
-                        >
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {t('journal.generateAnalysis')}
-                        </Button>
-                    )}
-                </div>
-                 {showAiAnalysis && (
-                    <CardDescription className="pt-2">{t('journal.aiDisclaimer')}</CardDescription>
-                )}
+                <CardTitle className="flex items-center gap-2 text-xl font-headline">
+                    <Bot className="text-primary"/>
+                    {t('journal.aiSummary')}
+                </CardTitle>
+                <CardDescription className="pt-2">{t('journal.aiDisclaimer')}</CardDescription>
             </CardHeader>
-            {showAiAnalysis && (
-              <CardContent>
-                  {isLoading && !summaryInfo && (
-                    <div className="space-y-4">
-                        <Skeleton className="h-4 w-3/4" />
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-full" />
-                    </div>
-                  )}
-                  {error && <p className="text-destructive">{error}</p>}
-                  {!isLoading && !error && summaryInfo?.summary && (
-                    <ContentBlockRenderer blocks={summaryInfo.summary} />
-                  )}
-              </CardContent>
-            )}
+            <CardContent>
+                {isLoading && !summaryInfo && (
+                  <div className="space-y-4">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-full" />
+                  </div>
+                )}
+                {error && <p className="text-destructive">{error}</p>}
+                {!isLoading && !error && summaryInfo?.summary && (
+                  <ContentBlockRenderer blocks={summaryInfo.summary} />
+                )}
+            </CardContent>
         </Card>
 
-        {showAiAnalysis && (
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-xl font-headline">
-                        <BookCopy className="text-primary"/>
-                        {t('journal.relatedJournals')}
-                    </CardTitle>
-                    <CardDescription>{t('journal.relatedDisclaimer')}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <RelatedJournals
-                        relatedJournals={summaryInfo?.relatedJournals ?? null}
-                        isLoading={isLoading && !summaryInfo}
-                        error={error}
-                        onJournalSelect={onJournalSelect}
-                    />
-                </CardContent>
-            </Card>
-        )}
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl font-headline">
+                    <BookCopy className="text-primary"/>
+                    {t('journal.relatedJournals')}
+                </CardTitle>
+                <CardDescription>{t('journal.relatedDisclaimer')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <RelatedJournals
+                    relatedJournals={summaryInfo?.relatedJournals ?? null}
+                    isLoading={isLoading && !summaryInfo}
+                    error={error}
+                    onJournalSelect={onJournalSelect}
+                />
+            </CardContent>
+        </Card>
       </div>
     </div>
   );

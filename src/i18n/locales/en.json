@@ -13,6 +13,8 @@
     "search": {
         "placeholder": "Enter a journal name to search...",
         "ariaLabel": "Search journals",
+        "clear": "Clear",
+        "clearAriaLabel": "Clear search",
         "initial": {
             "title": "Start your search",
             "description": "Enter at least 3 characters to begin searching for journals."
@@ -59,8 +61,23 @@
         "aiDisclaimer": "AI-generated analysis. Please verify critical information.",
         "relatedJournals": "Related Journals",
         "relatedDisclaimer": "Similar journals suggested by AI.",
+        "relatedEmpty": "No related journals found.",
         "summaryError": "Failed to generate AI-powered analysis.",
-        "generateAnalysis": "Generate Analysis"
+        "generateAnalysis": "Generate Analysis",
+        "viewHistory": "View historical data",
+        "historyTitle": "Historical data",
+        "historyIfTab": "Impact factor",
+        "historyPartitionTab": "Partition",
+        "historyJcrColumn": "JCR edition",
+        "historyPartitionSource": "Partition source",
+        "historyMajorCategory": "Major category",
+        "historyMajorPartition": "Major zone",
+        "historyAuthority": "Authority level",
+        "historyMinorCategories": "Minor categories",
+        "historyIfFootnote": "The horizontal axis shows Clarivate JCR release editions (e.g. JCR 2025). Values come from the JCR impact factors paired in each AJI edition.",
+        "historyPartitionFootnote": "Partition columns show CAS / XR years. When the partition system changes, refer to the partition source column.",
+        "historyNoIfData": "No impact factor data available.",
+        "historyNoPartitionData": "No partition data (e.g. the 2027 edition is JCR impact factors only)."
     },
     "cas": {
         "authorityLevel": "Authority Level",

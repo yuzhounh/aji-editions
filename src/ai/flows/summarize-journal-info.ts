@@ -1,23 +1,18 @@
 
-
 'use server';
 
 /**
- * @fileOverview Summarizes journal information, highlighting key metrics like impact factor and category rankings.
- *
- * - summarizeJournalInfo - A function that summarizes journal information.
- * - SummarizeJournalInfoInput - The input type for the summarizeJournalInfo function.
- * - SummarizeJournalInfoOutput - The return type for the summarizeJournalInfo function.
+ * @fileOverview Serves pre-generated journal summaries with edition-aware related journals.
  */
 
 import { z } from 'zod';
 import { getEditionById } from '@/data/journals';
-import type { Journal } from '@/data/journals';
-import { deepseekChatJson, parseDeepSeekJson } from '@/ai/deepseek';
+import { getStaticJournalSummary } from '@/data/summaries';
 import { getPrimaryIssn } from '@/lib/issn';
 
 const SummarizeJournalInfoInputSchema = z.object({
   journalName: z.string().describe('The name of the journal.'),
+  issn: z.string().describe('The ISSN of the journal.'),
   locale: z.enum(['en', 'zh']).describe('The locale for the output language.'),
   editionId: z.string().describe('The active AJI edition identifier.'),
 });
@@ -54,75 +49,19 @@ export type SummarizeJournalInfoOutput = z.infer<
   typeof SummarizeJournalInfoOutputSchema
 >;
 
-export async function summarizeJournalInfo(
-  input: SummarizeJournalInfoInput
-): Promise<SummarizeJournalInfoOutput> {
-  const { journalName, locale, editionId } = input;
-
-  const responseText = await deepseekChatJson([
-    {
-      role: 'system',
-      content:
-        'You are a professional academic journal analyst. You always output strictly valid JSON that matches the requested schema. Do not include any text outside the JSON object.',
-    },
-    {
-      role: 'user',
-      content: `
-Your task is to generate a detailed analysis report for the following journal.
-The entire report MUST be written in the language of the provided locale: ${locale}.
-IMPORTANT: When generating the report, DO NOT translate the original 'Journal Name'. Keep it as provided.
-
-Journal Name: ${journalName}
-
-You MUST output a single JSON object with exactly this shape:
-{
-  "summary": [
-    { "type": "heading", "level": 2, "content": "..." },
-    { "type": "paragraph", "content": "..." },
-    { "type": "list", "items": ["...", "..."] }
-  ],
-  "relatedJournals": [
-    { "journalName": "...", "issn": "..." }
-  ]
-}
-
-The "summary" array MUST include the following sections, in order, as content blocks:
-1. A heading (type "heading", level 2) for "Journal Introduction", followed by a paragraph (type "paragraph") providing background, history, and publisher info.
-2. A heading (type "heading", level 2) for "Main Publication Areas", followed by a list (type "list") detailing the research directions and subject areas.
-3. A heading (type "heading", level 2) for "Status in the Field", followed by a paragraph (type "paragraph") analyzing the journal's position, academic reputation, and influence.
-
-Additionally, based on your own knowledge, recommend 6-9 related journals. Populate these recommendations into the "relatedJournals" field, including their names and ISSNs.`,
-    },
-  ], { temperature: 0.7 });
-
-  let output: SummarizeJournalInfoOutput;
-  try {
-    const parsed = parseDeepSeekJson(responseText);
-    const validated = SummarizeJournalInfoOutputSchema.safeParse(parsed);
-    if (!validated.success) {
-      throw new Error(
-        `DeepSeek response did not match schema: ${JSON.stringify(validated.error.issues.slice(0, 3))}`
-      );
-    }
-    output = validated.data;
-  } catch (err: any) {
-    console.error('Failed to parse DeepSeek summary response:', err);
-    return { summary: [], relatedJournals: [] };
-  }
-
-  // After getting AI suggestions, filter them to ensure they exist in our local data.
-  // This prevents showing related journals that the user can't navigate to.
+function filterRelatedJournalsForEdition(
+  relatedJournals: SummarizeJournalInfoOutput['relatedJournals'],
+  editionId: string
+): SummarizeJournalInfoOutput['relatedJournals'] {
   const edition = getEditionById(editionId);
   const editionJournals = edition?.journals ?? [];
   const journalMapByIssn = new Map(editionJournals.map(j => [getPrimaryIssn(j.issn), j]));
 
-  const validatedRelatedJournals = output.relatedJournals
+  return relatedJournals
     .map(suggestedJournal => {
-      // AI might return an ISSN with a slash or extra characters. We only care about the primary part.
       const suggestedIssnPrefix = getPrimaryIssn(suggestedJournal.issn);
       const foundJournal = journalMapByIssn.get(suggestedIssnPrefix);
 
-      // If we found a matching journal in our local data, use our data's name and full ISSN.
       if (foundJournal) {
         return {
           journalName: foundJournal.journalName,
@@ -132,9 +71,30 @@ Additionally, based on your own knowledge, recommend 6-9 related journals. Popul
       return null;
     })
     .filter((j): j is { journalName: string; issn: string } => !!j);
+}
+
+export async function summarizeJournalInfo(
+  input: SummarizeJournalInfoInput
+): Promise<SummarizeJournalInfoOutput> {
+  const parsed = SummarizeJournalInfoInputSchema.safeParse(input);
+  if (!parsed.success) {
+    return { summary: [], relatedJournals: [] };
+  }
+
+  const { locale, editionId, issn } = parsed.data;
+  const primaryIssn = getPrimaryIssn(issn);
+  const staticSummary = getStaticJournalSummary(primaryIssn, locale);
+
+  if (!staticSummary) {
+    console.warn(`Missing pre-generated summary for ISSN ${primaryIssn}`);
+    return { summary: [], relatedJournals: [] };
+  }
 
   return {
-    summary: output.summary,
-    relatedJournals: validatedRelatedJournals,
+    summary: staticSummary.summary,
+    relatedJournals: filterRelatedJournalsForEdition(
+      staticSummary.relatedJournals,
+      editionId
+    ),
   };
 }

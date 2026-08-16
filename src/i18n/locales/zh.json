@@ -13,6 +13,8 @@
     "search": {
         "placeholder": "输入期刊名称进行搜索...",
         "ariaLabel": "搜索期刊",
+        "clear": "清除",
+        "clearAriaLabel": "清除搜索",
         "initial": {
             "title": "开始搜索",
             "description": "输入至少3个字符以开始搜索期刊。"
@@ -59,8 +61,23 @@
         "aiDisclaimer": "AI 生成的分析，请核实关键信息。",
         "relatedJournals": "相关期刊",
         "relatedDisclaimer": "AI 建议的相似期刊。",
+        "relatedEmpty": "暂无相关期刊。",
         "summaryError": "生成 AI 智能分析失败。",
-        "generateAnalysis": "生成分析"
+        "generateAnalysis": "生成分析",
+        "viewHistory": "查看历年数据",
+        "historyTitle": "历年数据",
+        "historyIfTab": "影响因子",
+        "historyPartitionTab": "分区",
+        "historyJcrColumn": "JCR 版本",
+        "historyPartitionSource": "分区体系",
+        "historyMajorCategory": "大类",
+        "historyMajorPartition": "大类分区",
+        "historyAuthority": "权威级别",
+        "historyMinorCategories": "小类",
+        "historyIfFootnote": "横轴为 Clarivate JCR 发布版（如 JCR 2025）；数据来自 AJI 各 edition 配对的 JCR 影响因子。",
+        "historyPartitionFootnote": "分区列标注 CAS / XR 年份；中科院与新锐体系切换时请以分区体系列为准。",
+        "historyNoIfData": "暂无可用影响因子数据。",
+        "historyNoPartitionData": "暂无分区数据（如 2027 版仅含 JCR 影响因子）。"
     },
     "cas": {
         "authorityLevel": "权威级别",

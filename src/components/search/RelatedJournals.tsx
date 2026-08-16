@@ -1,55 +1,74 @@
 "use client";
 
+import { useMemo } from "react";
+import type { Journal } from "@/data/journals";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import JournalListItem from "./JournalListItem";
+import { useEdition } from "@/contexts/EditionContext";
+import { useTranslation } from "@/i18n/provider";
+import { getPrimaryIssn } from "@/lib/issn";
 
-type RelatedJournal = {
+type RelatedJournalRef = {
   journalName: string;
   issn: string;
 };
 
 interface RelatedJournalsProps {
-  relatedJournals: RelatedJournal[] | null;
+  relatedJournals: RelatedJournalRef[] | null;
   isLoading: boolean;
   error: string | null;
   onJournalSelect: (journalName: string) => void;
 }
 
-export default function RelatedJournals({ relatedJournals, isLoading, error, onJournalSelect }: RelatedJournalsProps) {
+export default function RelatedJournals({
+  relatedJournals,
+  isLoading,
+  error,
+  onJournalSelect,
+}: RelatedJournalsProps) {
+  const { journals } = useEdition();
+  const { t } = useTranslation();
+
+  const journalMap = useMemo(
+    () => new Map(journals.map((j) => [getPrimaryIssn(j.issn), j])),
+    [journals]
+  );
+
+  const fullRelatedJournals = useMemo(() => {
+    if (!relatedJournals) return [];
+    return relatedJournals
+      .map((ref) => journalMap.get(getPrimaryIssn(ref.issn)))
+      .filter((j): j is Journal => !!j);
+  }, [relatedJournals, journalMap]);
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
-        <Skeleton className="h-24 w-full" />
+      <div className="space-y-2">
+        <Skeleton className="h-[88px] w-full" />
+        <Skeleton className="h-[88px] w-full" />
+        <Skeleton className="h-[88px] w-full" />
       </div>
     );
   }
 
   if (error) {
-    // Silently fail for this component as the error is shown in the summary
     return null;
   }
-  
-  if (!relatedJournals || relatedJournals.length === 0) {
-    return <p>No related journals found.</p>;
+
+  if (fullRelatedJournals.length === 0) {
+    return (
+      <p className="text-sm text-muted-foreground">{t("journal.relatedEmpty")}</p>
+    );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {relatedJournals.map((relatedJournal, index) => (
-        <Card
-          key={index}
-          className="cursor-pointer hover:shadow-md transition-shadow flex flex-col"
+    <div className="space-y-2">
+      {fullRelatedJournals.map((relatedJournal) => (
+        <JournalListItem
+          key={relatedJournal.issn}
+          journal={relatedJournal}
           onClick={() => onJournalSelect(relatedJournal.journalName)}
-        >
-          <CardHeader className="p-4 pb-2">
-            <CardTitle className="text-base font-medium leading-tight line-clamp-2">{relatedJournal.journalName}</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 pt-1">
-            <p className="text-sm text-muted-foreground">{relatedJournal.issn}</p>
-          </CardContent>
-        </Card>
+        />
       ))}
     </div>
   );

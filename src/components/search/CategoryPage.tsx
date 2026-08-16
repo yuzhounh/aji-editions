@@ -212,24 +212,6 @@ export default function CategoryPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const selectedJournal = journalHistory.length > 0 ? journalHistory[journalHistory.length - 1] : null;
-
-  React.useEffect(() => {
-    setSelectedCategory(null);
-    setJournalHistory([]);
-    setSelectedJournalList(null);
-    setCurrentPage(1);
-    setPreservedSearchTerm("");
-    setIsEditing(false);
-    setSelectedJournals(new Set());
-  }, [currentEditionId]);
-
-  React.useEffect(() => {
-    if (!editionHasPartition(currentEdition) && view === "categories") {
-      setView("search");
-    }
-  }, [currentEdition, view]);
-
   const categories = useMemo(() => {
     const categoryCounts: { [key: string]: number } = {};
     journals.forEach((journal) => {
@@ -248,6 +230,37 @@ export default function CategoryPage() {
   }, [categories]);
 
   const journalMap = useMemo(() => new Map(journals.map(j => [getPrimaryIssn(j.issn), j])), [journals]);
+
+  const prevEditionIdRef = React.useRef(currentEditionId);
+
+  React.useEffect(() => {
+    if (prevEditionIdRef.current === currentEditionId) return;
+    prevEditionIdRef.current = currentEditionId;
+
+    setIsEditing(false);
+    setSelectedJournals(new Set());
+    setCurrentPage(1);
+
+    setJournalHistory((prev) => {
+      if (prev.length === 0) return prev;
+      const mapped = prev
+        .map((journal) => journalMap.get(getPrimaryIssn(journal.issn)))
+        .filter((journal): journal is Journal => !!journal);
+      return mapped;
+    });
+
+    setSelectedCategory((prev) => {
+      if (!prev) return null;
+      if (!editionHasPartition(currentEdition)) return null;
+      return Object.prototype.hasOwnProperty.call(categories, prev) ? prev : null;
+    });
+  }, [currentEditionId, currentEdition, journalMap, categories]);
+
+  const selectedJournal = useMemo(() => {
+    if (journalHistory.length === 0) return null;
+    const tip = journalHistory[journalHistory.length - 1];
+    return journalMap.get(getPrimaryIssn(tip.issn)) ?? null;
+  }, [journalHistory, journalMap]);
 
   // For Favorites view - get all favorite journal IDs first
   const allFavoritesQuery = useMemoFirebase(
@@ -922,7 +935,7 @@ export default function CategoryPage() {
           <div className="py-8 md:py-10">
               {selectedJournal ? (
                 <JournalDetail
-                  key={selectedJournal.issn}
+                  key={`${currentEditionId}-${getPrimaryIssn(selectedJournal.issn)}`}
                   journal={selectedJournal}
                   onBack={handleBackFromDetail}
                   onJournalSelect={handleJournalSelectByName}

@@ -3,7 +3,7 @@
 "use client";
 
 import * as React from "react";
-import { useState, useMemo, ChangeEvent, useEffect } from "react";
+import { useState, useMemo, ChangeEvent, useEffect, useRef } from "react";
 import type { Journal } from "@/data/journals";
 import { Input } from "@/components/ui/input";
 import {
@@ -149,6 +149,7 @@ const triggerCsvDownload = (data: (string | number)[][], filename: string) => {
 function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: SearchPageProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
   const [currentPage, setCurrentPage] = useState(1);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const { user } = useFirebase();
   const { t } = useTranslation();
   const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
@@ -197,6 +198,14 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
     setCurrentPage(1);
     setIsEditing(false);
     setSelectedJournals(new Set());
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setCurrentPage(1);
+    setIsEditing(false);
+    setSelectedJournals(new Set());
+    searchInputRef.current?.focus();
   };
   
   const handlePageChange = (page: number) => {
@@ -362,15 +371,32 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
       </div>
 
       <div className="relative w-full">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
         <Input
+          ref={searchInputRef}
           type="text"
           placeholder={t('search.placeholder')}
           value={searchTerm}
           onChange={handleSearchChange}
-          className="w-full pl-12 h-14 text-lg rounded-2xl shadow-card ring-1 ring-border/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:shadow-card-hover transition-all duration-200"
+          className={cn(
+            "w-full pl-12 h-14 text-lg rounded-2xl shadow-card ring-1 ring-border/50 focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:shadow-card-hover transition-all duration-200",
+            searchTerm.length > 0 && "pr-14"
+          )}
           aria-label={t('search.ariaLabel')}
         />
+        {searchTerm.length > 0 && (
+          <button
+            type="button"
+            onClick={handleClearSearch}
+            className="group absolute right-3 top-1/2 flex -translate-y-1/2 items-center rounded-full px-1.5 py-1 text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2"
+            aria-label={t('search.clearAriaLabel')}
+          >
+            <X className="h-6 w-6 shrink-0" strokeWidth={2} />
+            <span className="hidden max-w-0 overflow-hidden whitespace-nowrap text-base font-medium opacity-0 transition-all duration-200 group-hover:inline group-hover:max-w-[5rem] group-hover:ml-1 group-hover:opacity-100">
+              {t('search.clear')}
+            </span>
+          </button>
+        )}
       </div>
 
       {showInitialMessage && (

@@ -12,6 +12,8 @@ const nextConfig: NextConfig = {
     '/**/*': [
       './src/data/editions/editions.json.gz',
       './public/data/editions.json.gz',
+      './src/data/summaries/summaries.json.gz',
+      './public/data/summaries.json.gz',
     ],
   },
   images: {

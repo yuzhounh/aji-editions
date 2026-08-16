@@ -22,6 +22,7 @@ const majorCategoryMap: Record<string, { en: string; zh: string }> = {
     "社会科学": { "en": "Social Sciences", "zh": "社会科学" },
     "艺术学": { "en": "Arts", "zh": "艺术学" },
     "人文学科": { "en": "Humanities", "zh": "人文学科" },
+    "人文科学": { "en": "Humanities", "zh": "人文科学" },
     "地球科学与环境生态": { "en": "Geosciences and Environmental Ecology", "zh": "地球科学与环境生态" },
     "交叉学科": { "en": "Interdisciplinary", "zh": "交叉学科" },
     "综合性期刊": { "en": "Comprehensive Journals", "zh": "综合性期刊" },

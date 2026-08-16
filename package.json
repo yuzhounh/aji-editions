@@ -1,6 +1,6 @@
 {
   "name": "aji-editions",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 9002",
@@ -9,6 +9,8 @@
     "build:journals": "tsx scripts/build-journals.ts",
     "build:editions": "tsx scripts/build-editions.ts",
     "bench:summaries": "tsx scripts/sample-summary-benchmark.ts",
+    "build:summaries": "tsx scripts/build-summaries.ts",
+    "pack:summaries": "tsx scripts/pack-summaries.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
