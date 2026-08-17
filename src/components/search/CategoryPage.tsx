@@ -425,6 +425,7 @@ export default function CategoryPage() {
       partitionHeader: exportPartitionHeader,
       includeListName: !!selectedJournalList,
       listName: selectedJournalList?.name,
+      locale,
     });
 
     triggerCsvDownload(exportTable, filename);

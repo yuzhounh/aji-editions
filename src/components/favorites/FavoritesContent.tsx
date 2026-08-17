@@ -60,7 +60,7 @@ interface FavoritesContentProps {
 
 export default function FavoritesContent({ onJournalListSelect, allFavorites, journalLists, isLoadingLists, onFindJournalsClick, onLoginClick, journals }: FavoritesContentProps) {
     const { user, isUserLoading, firestore } = useFirebase();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
     const { toast } = useToast();
     const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
     const [deleteDialogState, setDeleteDialogState] = useState<{open: boolean, listId: string, listName: string}>({open: false, listId: '', listName: ''});
@@ -181,6 +181,7 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
             hasPartition,
             partitionHeader: exportPartitionHeader,
             includeListName: true,
+            locale,
         };
         const headers = buildJournalExportHeaders(exportOptions);
         const rows: (string | number)[][] = [headers];

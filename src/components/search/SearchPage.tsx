@@ -22,6 +22,7 @@ import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
 import JournalListItem from "./JournalListItem";
 import { useIsMobile } from "@/hooks/use-is-mobile";
 import { triggerCsvDownload } from "@/lib/csv-download";
+import { buildJournalExportTable } from "@/lib/favorites-csv";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
@@ -139,7 +140,7 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
   const [currentPage, setCurrentPage] = useState(1);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const { user } = useFirebase();
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
   const isMobile = useIsMobile();
 
@@ -212,26 +213,13 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
     if (journalsForExport.length === 0) return;
     
     const filename = `${isExportingSelection ? 'Selected-' : ''}Search-results-for-${searchTerm.replace(/\s+/g, '_')}.csv`;
-    const headers = hasPartition
-      ? ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"]
-      : ["Journal Name", "ISSN/EISSN", "Impact Factor", "Open Access"];
-    const data = journalsForExport.map(j => hasPartition
-      ? [
-          j.journalName,
-          j.issn,
-          j.impactFactor,
-          j.majorCategoryPartition,
-          j.authorityJournal,
-          j.openAccess,
-        ]
-      : [
-          j.journalName,
-          j.issn,
-          j.impactFactor,
-          j.openAccess,
-        ]);
+    const exportTable = buildJournalExportTable(journalsForExport, {
+      hasPartition,
+      partitionHeader: exportPartitionHeader,
+      locale,
+    });
 
-    triggerCsvDownload([headers, ...data], filename);
+    triggerCsvDownload(exportTable, filename);
   };
   
   // --- Batch Edit Handlers ---
