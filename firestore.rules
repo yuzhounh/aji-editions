@@ -9,6 +9,7 @@
  * - /journals/{journalId}: Stores global journal data, publicly readable.
  * - /users/{userId}/journal_lists/{listId}: Stores user-created journal lists.
  * - /users/{userId}/favorite_journals/{favoriteJournalId}: Stores user's favorite journals within lists.
+ * - /shared_lists/{shareId}: Public read-only snapshots for shared journal lists (90-day expiry).
  *
  * Key Security Decisions:
  * - Users can only access their own user document and data nested under it.
