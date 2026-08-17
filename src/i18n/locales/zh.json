@@ -222,7 +222,7 @@
             },
             "ai": {
                 "title": "AI智能分析",
-                "p1": "在每个期刊的详情页上，点击“生成分析”按钮。我们的AI助手将提供该期刊的摘要并推荐相关的出版物。"
+                "p1": "打开期刊详情页即可自动加载 AI 智能分析，提供该期刊的摘要并推荐相关出版物。"
             }
         },
         "feedback": {
@@ -240,10 +240,14 @@
         },
         "empty": {
             "title": "暂无收藏",
-            "description": "您还没有创建任何期刊列表。您可以从CSV文件导入列表。",
+            "description": "您还没有创建任何期刊列表。可以新建列表、从 CSV 导入，或在搜索页收藏期刊。",
             "button": "查找期刊进行收藏"
         },
         "listEmpty": "该期刊列表为空。",
+        "listCountPartial": "当前版本 {{available}} / {{total}} 本",
+        "duplicateListName": "已存在同名列表。",
+        "unavailableInEdition": "有 {{count}} 本收藏的期刊在当前版本中不可用。",
+        "unavailableInEditionOnly": "该列表中的期刊在当前版本中均不可用。",
         "dialog": {
             "title": "添加到列表...",
             "newListPlaceholder": "新列表名称...",
@@ -265,13 +269,24 @@
         },
         "renameList": {
             "title": "重命名列表...",
+            "successTitle": "列表已重命名",
+            "successDescription": "列表已重命名为「{{listName}}」。",
             "errorTitle": "重命名列表时出错",
             "ariaLabel": "重命名列表 {{listName}}"
+        },
+        "exportAll": {
+            "button": "导出全部列表",
+            "emptyTitle": "没有可导出的内容",
+            "emptyDescription": "当前版本中没有可导出的期刊。"
         },
         "importList": {
             "button": "从 CSV 导入",
             "successTitle": "导入成功",
             "successDescription": "已创建新列表 '{{listName}}'，包含 {{count}} 本期刊。",
+            "successDescriptionWithSkipped": "已创建新列表 '{{listName}}'，包含 {{count}} 本期刊。{{skipped}} 行未匹配（当前版本中不存在）。",
+            "successDescriptionMulti": "已创建 {{listCount}} 个列表，共 {{count}} 本期刊。{{skipped}} 行未匹配（当前版本中不存在）。",
+            "noMatchesTitle": "未导入任何期刊",
+            "noMatchesDescription": "文件中的 ISSN 均无法匹配当前版本中的期刊。",
             "errorTitle": "导入失败",
             "errorDescription": "无法导入列表。请检查文件格式后重试。"
         },
@@ -284,6 +299,7 @@
             "errorTitle": "创建列表时出错"
         },
         "clearAll": {
+            "button": "清空所有收藏",
             "menuItem": "清空所有收藏",
             "title": "清空所有收藏？",
             "description": "此操作无法撤销。这将永久删除您所有的期刊列表和收藏的期刊。",
@@ -378,9 +394,47 @@
         "exportCsv": "导出为 CSV",
         "error": "错误"
     },
+    "share": {
+        "loading": "正在加载分享列表...",
+        "notFound": "分享链接无效或不存在。",
+        "revoked": "此分享链接已被撤销。",
+        "expired": "此分享链接已过期。",
+        "meta": "共 {{count}} 本期刊 · 分享自 {{edition}}",
+        "saveToFavorites": "保存到我的收藏",
+        "loginToSave": "登录后保存",
+        "backHome": "首页",
+        "openFavorites": "打开收藏",
+        "noVisibleJournals": "该列表中的期刊在当前版本中均不可用。",
+        "create": {
+            "button": "分享链接",
+            "title": "分享列表",
+            "description": "持有此链接的任何人都可以预览「{{listName}}」（{{count}} 本期刊）。链接 90 天后失效。",
+            "generating": "正在生成链接...",
+            "linkLabel": "分享链接",
+            "expiryNote": "链接 90 天后失效。任何人可预览；保存到收藏需登录。",
+            "copiedTitle": "链接已复制",
+            "copiedDescription": "分享链接已复制到剪贴板。",
+            "copyError": "无法复制链接，请手动复制。",
+            "errorTitle": "无法创建链接",
+            "errorDescription": "创建分享链接时出错。"
+        },
+        "import": {
+            "successTitle": "列表已保存",
+            "successDescription": "已创建「{{listName}}」，包含 {{count}} 本期刊。",
+            "successDescriptionWithSkipped": "已创建「{{listName}}」，包含 {{count}} 本期刊。{{skipped}} 本在当前版本中不可用。",
+            "noMatchesTitle": "无法保存",
+            "noMatchesDescription": "该列表中的期刊在您当前版本中均不可用。",
+            "errorTitle": "保存失败",
+            "errorDescription": "无法将此列表保存到您的收藏。",
+            "alreadySaved": "已保存为「{{listName}}」。"
+        }
+    },
     "batchEdit": {
         "button": "批量编辑",
         "selectAll": "全选",
+        "selectPage": "选择本页 ({{count}})",
+        "selectAllInList": "选择列表全部 ({{count}})",
+        "selectAllResults": "选择全部结果 ({{count}})",
         "deselectAll": "取消全选",
         "selected": "已选择 {{count}} 项",
         "move": {

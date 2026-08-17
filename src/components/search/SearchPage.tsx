@@ -21,7 +21,7 @@ import { useTranslation } from "@/i18n/provider";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
 import JournalListItem from "./JournalListItem";
 import { useIsMobile } from "@/hooks/use-is-mobile";
-import Papa from "papaparse";
+import { triggerCsvDownload } from "@/lib/csv-download";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
@@ -133,18 +133,6 @@ const getPaginationItems = (
 
   return uniquePages;
 };
-
-const triggerCsvDownload = (data: (string | number)[][], filename: string) => {
-  const csvContent = "data:text/csv;charset=utf-8," + Papa.unparse(data);
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", filename);
-  document.body.appendChild(link); // Required for FF
-  link.click();
-  document.body.removeChild(link);
-};
-
 
 function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: SearchPageProps) {
   const [searchTerm, setSearchTerm] = useState(initialSearchTerm);
@@ -270,8 +258,35 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
       setSelectedJournals(new Set());
     }
   };
+
+  const handleSelectPage = (checked: boolean | "indeterminate") => {
+    const pageIds = paginatedJournals.map((j) => getPrimaryIssn(j.issn));
+    setSelectedJournals((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        pageIds.forEach((id) => next.add(id));
+      } else {
+        pageIds.forEach((id) => next.delete(id));
+      }
+      return next;
+    });
+  };
   
   const isAllSelected = filteredJournals.length > 0 && selectedJournals.size === filteredJournals.length;
+  const isPageSelected =
+    paginatedJournals.length > 0 &&
+    paginatedJournals.every((j) => selectedJournals.has(getPrimaryIssn(j.issn)));
+  const isSomeSelected = selectedJournals.size > 0;
+  const selectAllCheckboxState: boolean | "indeterminate" = isAllSelected
+    ? true
+    : isSomeSelected
+      ? "indeterminate"
+      : false;
+  const selectPageCheckboxState: boolean | "indeterminate" = isPageSelected
+    ? true
+    : paginatedJournals.some((j) => selectedJournals.has(getPrimaryIssn(j.issn)))
+      ? "indeterminate"
+      : false;
 
   const showInitialMessage = searchTerm.length < 3;
   const showNoResultsMessage = searchTerm.length >= 3 && filteredJournals.length === 0;
@@ -289,15 +304,27 @@ function SearchClient({ journals, onJournalSelect, initialSearchTerm = "" }: Sea
     return (
         <div className="flex flex-wrap items-center justify-end gap-4 mb-6">
             {isEditing && (
-              <div className="flex items-center gap-2 mr-auto">
-                  <Checkbox
-                      id="select-all-search"
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
-                  />
-                  <label htmlFor="select-all-search" className="text-sm font-medium">
-                      {isAllSelected ? t('batchEdit.deselectAll') : t('batchEdit.selectAll')}
-                  </label>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mr-auto">
+                  <div className="flex items-center gap-2">
+                      <Checkbox
+                          id="select-page-search"
+                          checked={selectPageCheckboxState}
+                          onCheckedChange={handleSelectPage}
+                      />
+                      <label htmlFor="select-page-search" className="text-sm font-medium">
+                          {t('batchEdit.selectPage', { count: paginatedJournals.length })}
+                      </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <Checkbox
+                          id="select-all-search"
+                          checked={selectAllCheckboxState}
+                          onCheckedChange={handleSelectAll}
+                      />
+                      <label htmlFor="select-all-search" className="text-sm font-medium">
+                          {t('batchEdit.selectAllResults', { count: filteredJournals.length })}
+                      </label>
+                  </div>
               </div>
             )}
             {user && (

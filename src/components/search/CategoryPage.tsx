@@ -29,7 +29,7 @@ import {
   SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ArrowLeft, BookOpen, Menu, Folder, Download, Pencil, X, Check, Trash2, FolderSync, Heart, Info, Star, Search as SearchIcon } from "lucide-react";
+import { ArrowLeft, BookOpen, Menu, Folder, Download, Pencil, X, Check, Trash2, FolderSync, Heart, Info, Star, Search as SearchIcon, Share2 } from "lucide-react";
 import JournalDetail from "./JournalDetail";
 import SearchPage from "./SearchPage";
 import CategoryStats from "./CategoryStats";
@@ -43,12 +43,11 @@ import { LanguageToggle } from "../theme/LanguageToggle";
 import { useTranslation } from "@/i18n/provider";
 import { getMajorCategoryName } from "@/i18n/categories";
 import { useCollection, WithId } from "@/firebase/firestore/use-collection";
-import { collection, query, writeBatch, doc, getDocs, where, serverTimestamp, orderBy } from "firebase/firestore";
+import { collection, query, getDocs, where, orderBy } from "firebase/firestore";
 import { useMemoFirebase } from "@/firebase/provider";
 import LoginDialog from "../auth/LoginDialog";
 import JournalListItem from "./JournalListItem";
 import { useIsMobile } from "@/hooks/use-mobile";
-import Papa from "papaparse";
 import { Checkbox } from "../ui/checkbox";
 import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
 import {
@@ -67,7 +66,13 @@ import { useEdition } from "@/contexts/EditionContext";
 import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
 import { editionHasPartition } from "@/data/edition-utils";
 import { getPrimaryIssn } from "@/lib/issn";
+import { ChunkedWriteBatch } from "@/lib/firestore-batch";
+import { triggerCsvDownload } from "@/lib/csv-download";
+import { buildJournalExportTable, sanitizeCsvFilename } from "@/lib/favorites-csv";
 import EditionSwitcher from "@/components/edition/EditionSwitcher";
+import ShareListDialog from "../favorites/ShareListDialog";
+import { getEditionDisplayLabel } from "@/lib/edition-label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const JOURNALS_PER_PAGE = 20;
 
@@ -176,17 +181,6 @@ type FavoriteJournalEntry = {
   listId?: string;
 };
 
-const triggerCsvDownload = (data: (string | number)[][], filename: string) => {
-  const csvContent = "data:text/csv;charset=utf-8," + Papa.unparse(data);
-  const encodedUri = encodeURI(csvContent);
-  const link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", filename);
-  document.body.appendChild(link); // Required for FF
-  link.click();
-  document.body.removeChild(link);
-};
-
 
 export default function CategoryPage() {
   const { journals, currentEditionId, currentEdition } = useEdition();
@@ -210,6 +204,7 @@ export default function CategoryPage() {
   const [isAddToFavoritesOpen, setIsAddToFavoritesOpen] = useState(false);
   const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const categories = useMemo(() => {
@@ -263,24 +258,26 @@ export default function CategoryPage() {
   }, [journalHistory, journalMap]);
 
   // For Favorites view - get all favorite journal IDs first
+  const needsFavoritesData = view === "favorites" || selectedJournalList !== null;
+
   const allFavoritesQuery = useMemoFirebase(
       () =>
-        user && firestore
+        user && firestore && needsFavoritesData
           ? query(collection(firestore, `users/${user.uid}/favorite_journals`))
           : null,
-      [user, firestore]
+      [user, firestore, needsFavoritesData]
   );
   const { data: allFavoriteEntries } = useCollection<FavoriteJournalEntry>(allFavoritesQuery);
 
   const journalListsQuery = useMemoFirebase(
       () =>
-        user && firestore
+        user && firestore && needsFavoritesData
           ? query(
               collection(firestore, `users/${user.uid}/journal_lists`),
               orderBy("name", "asc")
             )
           : null,
-      [user, firestore]
+      [user, firestore, needsFavoritesData]
   );
   const { data: journalLists, isLoading: isLoadingLists } = useCollection<JournalList>(journalListsQuery);
 
@@ -316,6 +313,10 @@ export default function CategoryPage() {
         return factorB - factorA;
       });
   }, [favoriteJournalIdsInList, journalMap]);
+
+  const unavailableFavoriteCount = selectedJournalList
+    ? Math.max(0, favoriteJournalIdsInList.length - journalsForList.length)
+    : 0;
 
   const journalsToDisplay = selectedJournalList ? journalsForList : journalsForCategory;
 
@@ -413,31 +414,20 @@ export default function CategoryPage() {
 
     let filename = "journal-list.csv";
     if (selectedJournalList) {
-      filename = `${isExportingSelection ? 'Selected-' : ''}Favorites-${selectedJournalList.name.replace(/\s+/g, '_')}.csv`;
+      const baseName = sanitizeCsvFilename(selectedJournalList.name);
+      filename = `${isExportingSelection ? "Selected-" : ""}${baseName}.csv`;
     } else if (selectedCategory) {
-      filename = `${isExportingSelection ? 'Selected-' : ''}Category-${selectedCategory.replace(/\s+/g, '_')}.csv`;
+      filename = `${isExportingSelection ? 'Selected-' : ''}Category-${sanitizeCsvFilename(selectedCategory)}.csv`;
     }
 
-    const headers = hasPartition
-      ? ["Journal Name", "ISSN/EISSN", "Impact Factor", exportPartitionHeader, "Authority Level", "Open Access"]
-      : ["Journal Name", "ISSN/EISSN", "Impact Factor", "Open Access"];
-    const data = journalsForExport.map(j => hasPartition
-      ? [
-          j.journalName,
-          j.issn,
-          j.impactFactor,
-          j.majorCategoryPartition,
-          j.authorityJournal,
-          j.openAccess,
-        ]
-      : [
-          j.journalName,
-          j.issn,
-          j.impactFactor,
-          j.openAccess,
-        ]);
+    const exportTable = buildJournalExportTable(journalsForExport, {
+      hasPartition,
+      partitionHeader: exportPartitionHeader,
+      includeListName: !!selectedJournalList,
+      listName: selectedJournalList?.name,
+    });
 
-    triggerCsvDownload([headers, ...data], filename);
+    triggerCsvDownload(exportTable, filename);
   };
   
   // --- Batch Edit Handlers ---
@@ -465,22 +455,28 @@ export default function CategoryPage() {
     }
   };
 
+  const handleSelectPage = (checked: boolean | "indeterminate") => {
+    const pageIds = paginatedJournals.map((j) => getPrimaryIssn(j.issn));
+    setSelectedJournals((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        pageIds.forEach((id) => next.add(id));
+      } else {
+        pageIds.forEach((id) => next.delete(id));
+      }
+      return next;
+    });
+  };
+
   const handleDeleteSelected = () => {
     if (!user || !firestore || !selectedJournalList) return;
+
+    const journalIdsToDelete = Array.from(selectedJournals);
+    const deleteCount = journalIdsToDelete.length;
 
     setIsDeleteDialogOpen(false);
     setSelectedJournals(new Set());
     setIsEditing(false);
-
-    // Show optimistic toast
-    const successDescription = selectedJournals.size === 1
-        ? t('batchEdit.remove.successDescription_one')
-        : t('batchEdit.remove.successDescription_other', {count: selectedJournals.size});
-    
-    toast({
-        title: t('batchEdit.remove.successTitle'),
-        description: successDescription,
-    });
 
     const performDelete = async () => {
         const listIdToRemove = selectedJournalList?.id;
@@ -491,23 +487,30 @@ export default function CategoryPage() {
         }
 
         try {
-            const batch = writeBatch(firestore);
+            const batch = new ChunkedWriteBatch(firestore);
             const favoritesColRef = collection(firestore, `users/${user.uid}/favorite_journals`);
-            const journalIds = Array.from(selectedJournals);
             
-            // Chunking journalIds to stay within query limits
-            for (let i = 0; i < journalIds.length; i += 30) {
-                const chunk = journalIds.slice(i, i + 30);
+            for (let i = 0; i < journalIdsToDelete.length; i += 30) {
+                const chunk = journalIdsToDelete.slice(i, i + 30);
                 
                 const q = query(favoritesColRef, where('listId', '==', listIdToRemove), where('journalId', 'in', chunk));
 
                 const snapshot = await getDocs(q);
-                snapshot.forEach(doc => {
-                   batch.delete(doc.ref);
-                });
+                for (const docSnap of snapshot.docs) {
+                   await batch.delete(docSnap.ref);
+                }
             }
 
             await batch.commit();
+
+            const successDescription = deleteCount === 1
+                ? t('batchEdit.remove.successDescription_one')
+                : t('batchEdit.remove.successDescription_other', {count: deleteCount});
+            
+            toast({
+                title: t('batchEdit.remove.successTitle'),
+                description: successDescription,
+            });
 
         } catch(e) {
             console.error("Error deleting journals: ", e);
@@ -523,6 +526,20 @@ export default function CategoryPage() {
   }
   
   const isAllSelected = journalsToDisplay.length > 0 && selectedJournals.size === journalsToDisplay.length;
+  const isPageSelected =
+    paginatedJournals.length > 0 &&
+    paginatedJournals.every((j) => selectedJournals.has(getPrimaryIssn(j.issn)));
+  const isSomeSelected = selectedJournals.size > 0;
+  const selectAllCheckboxState: boolean | "indeterminate" = isAllSelected
+    ? true
+    : isSomeSelected
+      ? "indeterminate"
+      : false;
+  const selectPageCheckboxState: boolean | "indeterminate" = isPageSelected
+    ? true
+    : paginatedJournals.some((j) => selectedJournals.has(getPrimaryIssn(j.issn)))
+      ? "indeterminate"
+      : false;
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -622,33 +639,55 @@ export default function CategoryPage() {
   const renderActionToolbar = () => {
     const isFavoritesView = !!selectedJournalList;
     const canEdit = user;
-    
-    if (journalsToDisplay.length === 0) return null;
+    const canShare = isFavoritesView && user && favoriteJournalIdsInList.length > 0;
+    const canShowListActions = journalsToDisplay.length > 0;
+
+    if (!canShowListActions && !canShare) return null;
 
     return (
       <div className="flex flex-wrap items-center justify-end gap-4 mb-6">
-          {isEditing && (
-              <div className="flex items-center gap-2 mr-auto">
-                  <Checkbox
-                      id="select-all"
-                      checked={isAllSelected}
-                      onCheckedChange={handleSelectAll}
-                  />
-                  <label htmlFor="select-all" className="text-sm font-medium">
-                      {isAllSelected ? t('batchEdit.deselectAll') : t('batchEdit.selectAll')}
-                  </label>
+          {canShowListActions && isEditing && (
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mr-auto">
+                  <div className="flex items-center gap-2">
+                      <Checkbox
+                          id="select-page"
+                          checked={selectPageCheckboxState}
+                          onCheckedChange={handleSelectPage}
+                      />
+                      <label htmlFor="select-page" className="text-sm font-medium">
+                          {t('batchEdit.selectPage', { count: paginatedJournals.length })}
+                      </label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                      <Checkbox
+                          id="select-all"
+                          checked={selectAllCheckboxState}
+                          onCheckedChange={handleSelectAll}
+                      />
+                      <label htmlFor="select-all" className="text-sm font-medium">
+                          {t('batchEdit.selectAllInList', { count: journalsToDisplay.length })}
+                      </label>
+                  </div>
               </div>
           )}
-          {canEdit && (
+          {canShowListActions && canEdit && (
               <Button variant="outline" onClick={toggleEditing}>
                   {isEditing ? <X className="mr-2 h-4 w-4" /> : <Pencil className="mr-2 h-4 w-4" />}
                   {isEditing ? t('common.cancel') : (isFavoritesView ? t('batchEdit.button') : t('batchEdit.favorite.editButton'))}
               </Button>
           )}
+          {canShare && (
+              <Button variant="outline" onClick={() => setIsShareDialogOpen(true)}>
+                  <Share2 className="mr-2 h-4 w-4" />
+                  {t('share.create.button')}
+              </Button>
+          )}
+          {canShowListActions && (
           <Button variant="outline" onClick={handleExport} disabled={journalsToDisplay.length === 0}>
               <Download className="mr-2 h-4 w-4" />
               {t('common.exportCsv')}
           </Button>
+          )}
       </div>
     )
   };
@@ -663,6 +702,15 @@ export default function CategoryPage() {
           return (
             <div className="animate-in fade-in-50 duration-300">
               {renderListHeader()}
+              {selectedJournalList && unavailableFavoriteCount > 0 && (
+                <Alert className="mb-6">
+                  <AlertDescription>
+                    {journalsForList.length === 0
+                      ? t('favorites.unavailableInEditionOnly')
+                      : t('favorites.unavailableInEdition', { count: unavailableFavoriteCount })}
+                  </AlertDescription>
+                </Alert>
+              )}
               {hasPartition && (
               <div className="mb-6">
                 <CategoryStats journals={journalsToDisplay} collapsible defaultOpen={true} />
@@ -687,7 +735,11 @@ export default function CategoryPage() {
                 </div>
               ) : (
                 <div className="text-center py-10">
-                  <p className="text-muted-foreground">{t('favorites.listEmpty')}</p>
+                  <p className="text-muted-foreground">
+                    {unavailableFavoriteCount > 0
+                      ? t('favorites.unavailableInEditionOnly')
+                      : t('favorites.listEmpty')}
+                  </p>
                 </div>
               )}
               {renderPagination()}
@@ -852,6 +904,12 @@ export default function CategoryPage() {
               </span>
               <div className="flex items-center gap-2">
                 {isFavoritesView && (
+                    <Button variant="outline" size="sm" onClick={() => setIsAddToFavoritesOpen(true)}>
+                        <Heart className="mr-2 h-4 w-4" />
+                        {t('batchEdit.add.button')}
+                    </Button>
+                )}
+                {isFavoritesView && (
                     <Button variant="outline" size="sm" onClick={() => setIsMoveDialogOpen(true)}>
                         <FolderSync className="mr-2 h-4 w-4" />
                         {t('batchEdit.move.button')}
@@ -875,7 +933,7 @@ export default function CategoryPage() {
         </div>
         
         {isMoveDialogOpen && isFavoritesView && getBatchMoveDialog()}
-        {isAddToFavoritesOpen && isBrowseView && getBatchAddDialog()}
+        {isAddToFavoritesOpen && (isBrowseView || isFavoritesView) && getBatchAddDialog()}
         {isDeleteDialogOpen && isFavoritesView && getBatchDeleteDialog()}
       </div>
     );
@@ -940,6 +998,7 @@ export default function CategoryPage() {
                   onBack={handleBackFromDetail}
                   onJournalSelect={handleJournalSelectByName}
                   isHistoryRoot={journalHistory.length <= 1}
+                  onLoginClick={() => setIsLoginDialogOpen(true)}
                 />
               ) : (
                 renderContent()
@@ -951,6 +1010,16 @@ export default function CategoryPage() {
         </footer>
       </div>
       {!selectedJournal && <BatchActionBottomBar />}
+      {selectedJournalList && (
+        <ShareListDialog
+          open={isShareDialogOpen}
+          onOpenChange={setIsShareDialogOpen}
+          listName={selectedJournalList.name}
+          journalIds={favoriteJournalIdsInList}
+          sourceEditionId={currentEditionId}
+          sourceEditionLabel={getEditionDisplayLabel(currentEdition)}
+        />
+      )}
       <LoginDialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen} />
     </>
   );

@@ -20,7 +20,6 @@ import {
   query,
   orderBy,
   doc,
-  writeBatch,
   serverTimestamp,
   where,
   getDocs,
@@ -33,6 +32,8 @@ import { Loader2 } from "lucide-react";
 import { useTranslation } from "@/i18n/provider";
 import { useToast } from "@/hooks/use-toast";
 import { getPrimaryIssn } from "@/lib/issn";
+import { ChunkedWriteBatch } from "@/lib/firestore-batch";
+import { isDuplicateListName } from "@/lib/favorites-csv";
 
 interface AddToFavoritesDialogProps {
   open: boolean;
@@ -64,6 +65,14 @@ export default function AddToFavoritesDialog({
   const isBatchOperation = batchJournals.length > 0;
   const journalsToProcess = isBatchOperation ? batchJournals : [journal];
   const journalIdsToProcess = journalsToProcess.map(j => getPrimaryIssn(j.issn));
+  const canSaveWithEmptySelection = !isBatchOperation && mode === 'add';
+  const hasPendingTempList = [...selectedLists].some((id) => id.startsWith("temp_"));
+  const resolvedListIds = [...selectedLists].filter((id) => !id.startsWith("temp_"));
+  const isSaveDisabled =
+    isSaving ||
+    isCreating ||
+    hasPendingTempList ||
+    (resolvedListIds.length === 0 && !canSaveWithEmptySelection);
 
   const journalListsQuery = useMemoFirebase(
     () =>
@@ -104,9 +113,19 @@ export default function AddToFavoritesDialog({
 
   const handleCreateNewList = async () => {
     if (!newList.trim() || !user || !firestore) return;
-    setIsCreating(true);
 
     const listName = newList.trim();
+    const existingNames = (journalLists || []).map((list) => list.name);
+    if (isDuplicateListName(listName, existingNames)) {
+      toast({
+        variant: "destructive",
+        title: t("common.error"),
+        description: t("favorites.duplicateListName"),
+      });
+      return;
+    }
+
+    setIsCreating(true);
     const tempId = `temp_${Date.now()}`;
     const newListData = {
       name: listName,
@@ -154,25 +173,19 @@ export default function AddToFavoritesDialog({
   };
 
   const handleSaveChanges = async () => {
-    if (!user || !firestore || selectedLists.size === 0) return;
+    if (!user || !firestore) return;
+    if (resolvedListIds.length === 0 && !canSaveWithEmptySelection) return;
     
     setIsSaving(true);
-    onOpenChange(false); // Optimistic UI update: close dialog immediately
-
-    // Show optimistic toast
-    toast({
-        title: isBatchOperation ? t('batchEdit.add.successTitle') : t('favorites.dialog.saveSuccessTitle'),
-        description: isBatchOperation ? t('batchEdit.add.successDescription', {count: batchJournals.length}) : t('favorites.dialog.saveSuccessDescription'),
-    });
-    
+    onOpenChange(false);
     onSuccess?.();
 
     const performSave = async () => {
         try {
-            const batch = writeBatch(firestore);
+            const batch = new ChunkedWriteBatch(firestore);
+            const selectedListIdSet = new Set(resolvedListIds);
 
             for (const journalId of journalIdsToProcess) {
-                // If moving, delete from the old list first.
                 if (mode === 'move' && currentListId) {
                     const oldFavQuery = query(
                         collection(firestore, `users/${user.uid}/favorite_journals`),
@@ -180,47 +193,76 @@ export default function AddToFavoritesDialog({
                         where('listId', '==', currentListId)
                     );
                     const oldFavs = await getDocs(oldFavQuery);
-                    oldFavs.forEach(doc => batch.delete(doc.ref));
+                    for (const oldFav of oldFavs.docs) {
+                      await batch.delete(oldFav.ref);
+                    }
                 }
 
-                // Add to all newly selected lists.
-                selectedLists.forEach(listId => {
+                for (const listId of resolvedListIds) {
                     const favoriteId = `${journalId}_${listId}`;
                     const favoriteRef = doc(firestore, `users/${user.uid}/favorite_journals`, favoriteId);
-                    batch.set(favoriteRef, {
-                        journalId: journalId,
+                    await batch.set(favoriteRef, {
+                        journalId,
                         userId: user.uid,
-                        listId: listId,
+                        listId,
                         createdAt: serverTimestamp(),
                     });
-                });
+                }
 
-                // For single-journal "add/edit" (not batch add/move).
                 if (!isBatchOperation && mode === 'add') {
-                    const favsQuery = query(collection(firestore, `users/${user.uid}/favorite_journals`), where('journalId', '==', journalId));
+                    const favsQuery = query(
+                      collection(firestore, `users/${user.uid}/favorite_journals`),
+                      where('journalId', '==', journalId)
+                    );
                     const existingFavsSnapshot = await getDocs(favsQuery);
-                    const initialListIds = new Set(existingFavsSnapshot.docs.map(doc => doc.data().listId).filter(Boolean));
+                    const initialListIds = new Set(
+                      existingFavsSnapshot.docs
+                        .map((docSnap) => docSnap.data().listId)
+                        .filter(Boolean)
+                    );
+                    const listsToRemove = new Set(
+                      [...initialListIds].filter((id) => !selectedListIdSet.has(id))
+                    );
 
-                    // Remove from lists that are no longer selected.
-                    const listsToRemove = new Set([...initialListIds].filter(id => !selectedLists.has(id)));
-                    existingFavsSnapshot.docs.forEach(doc => {
-                        const listId = doc.data().listId;
+                    for (const docSnap of existingFavsSnapshot.docs) {
+                        const listId = docSnap.data().listId;
                         if (listId && listsToRemove.has(listId)) {
-                            batch.delete(doc.ref);
+                            await batch.delete(docSnap.ref);
                         }
-                    });
+                    }
                 }
             }
             
             await batch.commit();
 
+            if (mode === 'move') {
+              toast({
+                title: t('batchEdit.move.successTitle'),
+                description: t('batchEdit.move.successDescription', { count: batchJournals.length }),
+              });
+            } else if (isBatchOperation) {
+              toast({
+                title: t('batchEdit.add.successTitle'),
+                description: t('batchEdit.add.successDescription', { count: batchJournals.length }),
+              });
+            } else {
+              toast({
+                title: t('favorites.dialog.saveSuccessTitle'),
+                description: t('favorites.dialog.saveSuccessDescription'),
+              });
+            }
+
         } catch (error) {
             console.error("Error updating favorites:", error);
-            // Show error toast if background operation fails
             toast({
               variant: "destructive",
               title: t('common.error'),
-              description: isBatchOperation ? t('batchEdit.add.errorDescription') : t('favorites.dialog.saveErrorDescription'),
+              description:
+                mode === 'move'
+                  ? t('batchEdit.move.errorDescription')
+                  : isBatchOperation
+                    ? t('batchEdit.add.errorDescription')
+                    : t('favorites.dialog.saveErrorDescription'),
             });
         } finally {
             setIsSaving(false);
@@ -324,7 +366,7 @@ export default function AddToFavoritesDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} className="min-w-[100px]">{t('common.cancel')}</Button>
-          <Button onClick={handleSaveChanges} disabled={isSaving || selectedLists.size === 0} className="min-w-[100px]">
+          <Button onClick={handleSaveChanges} disabled={isSaveDisabled} className="min-w-[100px]">
             {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {getButtonText()}
           </Button>

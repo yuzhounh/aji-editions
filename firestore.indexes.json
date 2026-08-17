@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "favorite_journals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "listId", "order": "ASCENDING" },
+        { "fieldPath": "journalId", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "favorite_journals",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "journalId", "order": "ASCENDING" },
+        { "fieldPath": "listId", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

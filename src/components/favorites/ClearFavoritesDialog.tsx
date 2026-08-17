@@ -17,7 +17,8 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from '@/i18n/provider';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
-import { writeBatch, collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs } from 'firebase/firestore';
+import { deleteRefsInBatches } from '@/lib/firestore-batch';
 
 interface ClearFavoritesDialogProps {
   open: boolean;
@@ -35,19 +36,17 @@ export default function ClearFavoritesDialog({ open, onOpenChange }: ClearFavori
 
     setIsDeleting(true);
     try {
-      const batch = writeBatch(firestore);
-
-      // 1. Get all journal lists
       const listsQuery = query(collection(firestore, `users/${user.uid}/journal_lists`));
       const listsSnapshot = await getDocs(listsQuery);
-      listsSnapshot.forEach((doc) => batch.delete(doc.ref));
 
-      // 2. Get all favorite journals
       const favoritesQuery = query(collection(firestore, `users/${user.uid}/favorite_journals`));
       const favoritesSnapshot = await getDocs(favoritesQuery);
-      favoritesSnapshot.forEach((doc) => batch.delete(doc.ref));
 
-      await batch.commit();
+      const refs = [
+        ...listsSnapshot.docs.map((docSnap) => docSnap.ref),
+        ...favoritesSnapshot.docs.map((docSnap) => docSnap.ref),
+      ];
+      await deleteRefsInBatches(firestore, refs);
 
       toast({
         title: t('favorites.clearAll.successTitle'),

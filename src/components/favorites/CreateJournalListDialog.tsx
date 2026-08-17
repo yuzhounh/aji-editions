@@ -17,52 +17,63 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { isDuplicateListName } from '@/lib/favorites-csv';
 
 interface CreateJournalListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  existingListNames?: string[];
 }
 
-export default function CreateJournalListDialog({ open, onOpenChange }: CreateJournalListDialogProps) {
+export default function CreateJournalListDialog({
+  open,
+  onOpenChange,
+  existingListNames = [],
+}: CreateJournalListDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { user, firestore } = useFirebase();
   const [listName, setListName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!user || !firestore || !listName.trim()) return;
 
+    const trimmedName = listName.trim();
+    if (isDuplicateListName(trimmedName, existingListNames)) {
+      toast({
+        variant: 'destructive',
+        title: t('favorites.createList.errorTitle'),
+        description: t('favorites.duplicateListName'),
+      });
+      return;
+    }
+
     setIsCreating(true);
-    // Optimistically close dialog and show toast
-    onOpenChange(false);
-    toast({
-      title: t('favorites.createList.successTitle'),
-      description: t('favorites.createList.successDescription', { listName: listName.trim() }),
-    });
-    const finalListName = listName.trim();
+    const finalListName = trimmedName;
     setListName('');
 
-    const performCreate = async () => {
-        try {
-          await addDoc(collection(firestore, `users/${user.uid}/journal_lists`), {
-            name: finalListName,
-            userId: user.uid,
-            createdAt: serverTimestamp(),
-          });
-        } catch (error: any) {
-          console.error("Error creating new list:", error);
-          toast({
-            variant: 'destructive',
-            title: t('favorites.createList.errorTitle'),
-            description: error.message,
-          });
-        } finally {
-          setIsCreating(false);
-        }
+    try {
+      await addDoc(collection(firestore, `users/${user.uid}/journal_lists`), {
+        name: finalListName,
+        userId: user.uid,
+        createdAt: serverTimestamp(),
+      });
+      onOpenChange(false);
+      toast({
+        title: t('favorites.createList.successTitle'),
+        description: t('favorites.createList.successDescription', { listName: finalListName }),
+      });
+    } catch (error: any) {
+      console.error("Error creating new list:", error);
+      toast({
+        variant: 'destructive',
+        title: t('favorites.createList.errorTitle'),
+        description: error.message,
+      });
+    } finally {
+      setIsCreating(false);
     }
-    
-    performCreate();
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

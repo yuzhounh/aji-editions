@@ -17,7 +17,8 @@ import { Loader2 } from 'lucide-react';
 import { useTranslation } from '@/i18n/provider';
 import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
-import { doc, writeBatch, collection, query, where, getDocs } from 'firebase/firestore';
+import { doc, collection, query, where, getDocs } from 'firebase/firestore';
+import { deleteRefsInBatches } from '@/lib/firestore-batch';
 
 interface DeleteJournalListDialogProps {
   open: boolean;
@@ -37,23 +38,18 @@ export default function DeleteJournalListDialog({ open, onOpenChange, listId, li
 
     setIsDeleting(true);
     try {
-      const batch = writeBatch(firestore);
-
-      // 1. Delete the journal list document itself.
       const listRef = doc(firestore, `users/${user.uid}/journal_lists`, listId);
-      batch.delete(listRef);
 
-      // 2. Find and delete all favorite entries associated with this list.
       const favoritesQuery = query(
         collection(firestore, `users/${user.uid}/favorite_journals`),
         where('listId', '==', listId)
       );
       const favoritesSnapshot = await getDocs(favoritesQuery);
-      favoritesSnapshot.forEach((favDoc) => {
-        batch.delete(favDoc.ref);
-      });
 
-      await batch.commit();
+      await deleteRefsInBatches(firestore, [
+        listRef,
+        ...favoritesSnapshot.docs.map((favDoc) => favDoc.ref),
+      ]);
 
       toast({
         title: t('favorites.deleteList.successTitle'),

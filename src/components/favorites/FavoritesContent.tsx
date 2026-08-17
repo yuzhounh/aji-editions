@@ -5,7 +5,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { useFirebase } from "@/firebase";
 import { WithId } from "@/firebase/firestore/use-collection";
-import { collection, writeBatch, doc, serverTimestamp, addDoc } from "firebase/firestore";
+import { collection, doc, serverTimestamp, addDoc, deleteDoc } from "firebase/firestore";
 import { Button } from "@/components/ui/button";
 import {
     Card,
@@ -15,14 +15,27 @@ import {
 } from "@/components/ui/card";
 import { Journal } from "@/data/journals";
 import { useTranslation } from "@/i18n/provider";
-import { BookText, LogIn, Pencil, Trash2, Upload, FolderPlus, Search } from "lucide-react";
+import { BookText, LogIn, Pencil, Trash2, Upload, FolderPlus, Search, Download } from "lucide-react";
 import CategoryStats from "../search/CategoryStats";
 import DeleteJournalListDialog from "./DeleteJournalListDialog";
 import RenameJournalListDialog from "./RenameJournalListDialog";
 import CreateJournalListDialog from "./CreateJournalListDialog";
+import ClearFavoritesDialog from "./ClearFavoritesDialog";
 import Papa from "papaparse";
 import { useToast } from "@/hooks/use-toast";
 import { getPrimaryIssn } from "@/lib/issn";
+import { ChunkedWriteBatch } from "@/lib/firestore-batch";
+import { triggerCsvDownload } from "@/lib/csv-download";
+import {
+  buildJournalExportRow,
+  buildJournalExportHeaders,
+  deriveListNameFromFilename,
+  groupImportRowsByListName,
+  resolveUniqueListName,
+  sanitizeCsvFilename,
+  type ParsedImportRow,
+} from "@/lib/favorites-csv";
+import { usePartitionTerminology } from "@/hooks/use-partition-terminology";
 
 export type JournalList = {
     name: string;
@@ -49,28 +62,38 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
     const { user, isUserLoading, firestore } = useFirebase();
     const { t } = useTranslation();
     const { toast } = useToast();
+    const { exportPartitionHeader, hasPartition } = usePartitionTerminology();
     const [deleteDialogState, setDeleteDialogState] = useState<{open: boolean, listId: string, listName: string}>({open: false, listId: '', listName: ''});
     const [renameDialogState, setRenameDialogState] = useState<{open: boolean, listId: string, listName: string}>({open: false, listId: '', listName: ''});
     const [isCreateListDialogOpen, setIsCreateListDialogOpen] = useState(false);
+    const [isClearFavoritesDialogOpen, setIsClearFavoritesDialogOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     
     const [journalsForStats, setJournalsForStats] = useState<Journal[]>([]);
 
-    const categorized = useMemo(() => {
-        if (!allFavorites || allFavorites.length === 0) {
-            return {};
+    const journalMapByIssn = useMemo(
+        () => new Map(journals.map((j) => [getPrimaryIssn(j.issn), j])),
+        [journals]
+    );
+
+    const listCounts = useMemo(() => {
+        const total: Record<string, number> = {};
+        const available: Record<string, number> = {};
+
+        if (!allFavorites) {
+            return { total, available };
         }
 
-        const categorizedFavorites: Record<string, number> = {};
-        
-        allFavorites.forEach(fav => {
-            if (fav.listId && fav.listId.trim() !== '') {
-                categorizedFavorites[fav.listId] = (categorizedFavorites[fav.listId] || 0) + 1;
+        allFavorites.forEach((fav) => {
+            if (!fav.listId?.trim()) return;
+            total[fav.listId] = (total[fav.listId] || 0) + 1;
+            if (journalMapByIssn.has(fav.journalId)) {
+                available[fav.listId] = (available[fav.listId] || 0) + 1;
             }
         });
 
-        return categorizedFavorites;
-    }, [allFavorites]);
+        return { total, available };
+    }, [allFavorites, journalMapByIssn]);
     
     useEffect(() => {
         if (!allFavorites) {
@@ -81,17 +104,16 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
         if (allFavorites.length === 0) {
             setJournalsForStats([]);
         } else {
-            const journalMap = new Map(journals.map(j => [getPrimaryIssn(j.issn), j]));
             const uniqueJournalIds = new Set<string>();
             allFavorites.forEach(fav => {
                 uniqueJournalIds.add(fav.journalId);
             });
             const statsJournals = Array.from(uniqueJournalIds)
-                .map(id => journalMap.get(id))
+                .map(id => journalMapByIssn.get(id))
                 .filter((j): j is Journal => !!j);
             setJournalsForStats(statsJournals);
         }
-    }, [allFavorites, journals]);
+    }, [allFavorites, journalMapByIssn]);
 
 
     const handleDeleteClick = (e: React.MouseEvent, list: WithId<JournalList>) => {
@@ -108,6 +130,90 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
         fileInputRef.current?.click();
     };
 
+    const importJournalsIntoList = async (
+        listName: string,
+        journalIds: string[],
+        existingNames: Set<string>
+    ): Promise<{ imported: number; skipped: number; listName?: string }> => {
+        if (!user || !firestore) return { imported: 0, skipped: 0 };
+
+        const validJournalIds = journalIds.filter((issn) => journalMapByIssn.has(issn));
+        const skippedCount = journalIds.length - validJournalIds.length;
+
+        if (validJournalIds.length === 0) {
+            return { imported: 0, skipped: skippedCount };
+        }
+
+        const resolvedName = resolveUniqueListName(listName, existingNames);
+        existingNames.add(resolvedName);
+
+        const listRef = await addDoc(collection(firestore, `users/${user.uid}/journal_lists`), {
+            name: resolvedName,
+            userId: user.uid,
+            createdAt: serverTimestamp(),
+        });
+
+        try {
+            const batch = new ChunkedWriteBatch(firestore);
+            for (const journalId of validJournalIds) {
+                const favoriteId = `${journalId}_${listRef.id}`;
+                const favoriteRef = doc(firestore, `users/${user.uid}/favorite_journals`, favoriteId);
+                await batch.set(favoriteRef, {
+                    journalId,
+                    userId: user.uid,
+                    listId: listRef.id,
+                    createdAt: serverTimestamp(),
+                });
+            }
+            await batch.commit();
+        } catch (batchError) {
+            await deleteDoc(listRef);
+            throw batchError;
+        }
+
+        return { imported: validJournalIds.length, skipped: skippedCount, listName: resolvedName };
+    };
+
+    const handleExportAll = () => {
+        if (!journalLists || !allFavorites) return;
+
+        const exportOptions = {
+            hasPartition,
+            partitionHeader: exportPartitionHeader,
+            includeListName: true,
+        };
+        const headers = buildJournalExportHeaders(exportOptions);
+        const rows: (string | number)[][] = [headers];
+
+        for (const list of journalLists) {
+            const journalIds = allFavorites
+                .filter((fav) => fav.listId === list.id)
+                .map((fav) => fav.journalId);
+
+            for (const journalId of journalIds) {
+                const journal = journalMapByIssn.get(journalId);
+                if (!journal) continue;
+                rows.push(
+                    buildJournalExportRow(journal, {
+                        ...exportOptions,
+                        listName: list.name,
+                    })
+                );
+            }
+        }
+
+        if (rows.length <= 1) {
+            toast({
+                variant: "destructive",
+                title: t("favorites.exportAll.emptyTitle"),
+                description: t("favorites.exportAll.emptyDescription"),
+            });
+            return;
+        }
+
+        triggerCsvDownload(rows, `${sanitizeCsvFilename("All-Favorites")}.csv`);
+    };
+
     const handleFileImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (!file || !user || !firestore) return;
@@ -118,41 +224,72 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
             header: true,
             skipEmptyLines: true,
             complete: async (results) => {
-                const importedJournals = results.data as { "ISSN/EISSN": string }[];
-                const journalIssns = new Set(importedJournals.map(j => getPrimaryIssn(j["ISSN/EISSN"] ?? "")).filter(Boolean));
+                const fallbackListName = deriveListNameFromFilename(file.name);
+                const groups = groupImportRowsByListName(
+                    results.data as ParsedImportRow[],
+                    fallbackListName
+                );
 
-                let listName = file.name.replace(/\.csv$/, '').replace(/_/g, ' ');
-                const existingNames = new Set((journalLists || []).map(l => l.name));
-                if (existingNames.has(listName)) {
-                    listName = `${listName} (${new Date().toLocaleDateString()})`;
+                if (groups.size === 0) {
+                    toast({
+                        variant: 'destructive',
+                        title: t('favorites.importList.noMatchesTitle'),
+                        description: t('favorites.importList.noMatchesDescription'),
+                    });
+                    return;
                 }
 
+                const existingNames = new Set((journalLists || []).map((l) => l.name));
+                let totalImported = 0;
+                let totalSkipped = 0;
+                let listsCreated = 0;
+                let lastImportedListName = fallbackListName;
+
                 try {
-                    const journalMapByIssn = new Map(journals.map(j => [getPrimaryIssn(j.issn), j]));
-                    const validJournalIds = Array.from(journalIssns).filter(issn => journalMapByIssn.has(issn));
-                    
-                    const listRef = await addDoc(collection(firestore, `users/${user.uid}/journal_lists`), {
-                        name: listName,
-                        userId: user.uid,
-                        createdAt: serverTimestamp(),
-                    });
-                    
-                    const batch = writeBatch(firestore);
-                    validJournalIds.forEach(journalId => {
-                        const favoriteId = `${journalId}_${listRef.id}`;
-                        const favoriteRef = doc(firestore, `users/${user.uid}/favorite_journals`, favoriteId);
-                        batch.set(favoriteRef, {
-                            journalId: journalId,
-                            userId: user.uid,
-                            listId: listRef.id,
-                            createdAt: serverTimestamp(),
+                    for (const [listName, issnSet] of groups) {
+                        const result = await importJournalsIntoList(
+                            listName,
+                            Array.from(issnSet),
+                            existingNames
+                        );
+                        totalImported += result.imported;
+                        totalSkipped += result.skipped;
+                        if (result.imported > 0) {
+                            listsCreated += 1;
+                            if (result.listName) {
+                                lastImportedListName = result.listName;
+                            }
+                        }
+                    }
+
+                    if (totalImported === 0) {
+                        toast({
+                            variant: 'destructive',
+                            title: t('favorites.importList.noMatchesTitle'),
+                            description: t('favorites.importList.noMatchesDescription'),
                         });
-                    });
-                    await batch.commit();
+                        return;
+                    }
 
                     toast({
                         title: t('favorites.importList.successTitle'),
-                        description: t('favorites.importList.successDescription', { listName, count: validJournalIds.length }),
+                        description:
+                            listsCreated > 1
+                                ? t('favorites.importList.successDescriptionMulti', {
+                                    listCount: listsCreated,
+                                    count: totalImported,
+                                    skipped: totalSkipped,
+                                  })
+                                : totalSkipped > 0
+                                  ? t('favorites.importList.successDescriptionWithSkipped', {
+                                      listName: lastImportedListName,
+                                      count: totalImported,
+                                      skipped: totalSkipped,
+                                    })
+                                  : t('favorites.importList.successDescription', {
+                                      listName: lastImportedListName,
+                                      count: totalImported,
+                                    }),
                     });
                 } catch (error) {
                     console.error("Error importing list:", error);
@@ -219,6 +356,18 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
                             <Upload className="mr-2 h-4 w-4" />
                             {t('favorites.importList.button')}
                         </Button>
+                        <Button variant="outline" onClick={handleExportAll}>
+                            <Download className="mr-2 h-4 w-4" />
+                            {t('favorites.exportAll.button')}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsClearFavoritesDialogOpen(true)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            {t('favorites.clearAll.button')}
+                        </Button>
                         <input
                             type="file"
                             ref={fileInputRef}
@@ -234,7 +383,7 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
                             className="group relative cursor-pointer hover:shadow-lg hover:border-primary transition-all duration-200 flex flex-col"
                             onClick={() => onJournalListSelect(list)}
                             >
-                                <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                <div className="absolute top-2 right-2 flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10">
                                     <Button
                                         variant="ghost"
                                         size="icon"
@@ -263,7 +412,17 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
                                     <div className="flex items-center text-sm text-muted-foreground">
                                     <BookText className="w-4 h-4 mr-2" />
                                     <span>
-                                        {categorized[list.id] || 0} {t('categories.journals')}
+                                        {(() => {
+                                            const total = listCounts.total[list.id] || 0;
+                                            const available = listCounts.available[list.id] || 0;
+                                            if (total > available && available > 0) {
+                                                return t('favorites.listCountPartial', {
+                                                    available,
+                                                    total,
+                                                });
+                                            }
+                                            return `${available || total} ${t('categories.journals')}`;
+                                        })()}
                                     </span>
                                     </div>
                                 </CardContent>
@@ -316,11 +475,19 @@ export default function FavoritesContent({ onJournalListSelect, allFavorites, jo
                     onOpenChange={(open) => setRenameDialogState({ ...renameDialogState, open })}
                     listId={renameDialogState.listId}
                     listName={renameDialogState.listName}
+                    existingListNames={(journalLists || [])
+                        .filter((list) => list.id !== renameDialogState.listId)
+                        .map((list) => list.name)}
                 />
             )}
              <CreateJournalListDialog 
                 open={isCreateListDialogOpen}
                 onOpenChange={setIsCreateListDialogOpen}
+                existingListNames={(journalLists || []).map((list) => list.name)}
+            />
+            <ClearFavoritesDialog
+                open={isClearFavoritesDialogOpen}
+                onOpenChange={setIsClearFavoritesDialogOpen}
             />
         </div>
     );

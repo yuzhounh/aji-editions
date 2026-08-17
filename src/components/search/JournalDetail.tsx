@@ -51,6 +51,7 @@ interface JournalDetailProps {
   onBack: () => void;
   onJournalSelect: (journalName: string) => void;
   isHistoryRoot: boolean;
+  onLoginClick?: () => void;
 }
 
 type SummaryCache = {
@@ -109,7 +110,7 @@ const ApcInfoItem = ({ journalName }: { journalName: string }) => {
 
 const formatIssn = (issn: string) => formatIssnDisplay(issn);
 
-export default function JournalDetail({ journal, onBack, onJournalSelect, isHistoryRoot }: JournalDetailProps) {
+export default function JournalDetail({ journal, onBack, onJournalSelect, isHistoryRoot, onLoginClick }: JournalDetailProps) {
   const [summaryCache, setSummaryCache] = useState<SummaryCache>({});
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -174,7 +175,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
 
   const handleFavoriteClick = () => {
     if (!user) {
-        // Optionally, trigger login dialog here
+        onLoginClick?.();
         return;
     }
     setIsFavoritesDialogOpen(true);
@@ -208,23 +209,21 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
                 {t("journal.viewHistory")}
               </Button>
             )}
+            <Button
+              variant={isFavorited ? "default" : "outline"}
+              size="icon"
+              onClick={handleFavoriteClick}
+              disabled={!!user && isFavoriteLoading}
+              aria-label={t('journal.favorite')}
+            >
+              <Heart className={`h-5 w-5 ${user && isFavorited ? "fill-current" : ""}`} />
+            </Button>
             {user && (
-              <>
-                <Button
-                  variant={isFavorited ? "default" : "outline"}
-                  size="icon"
-                  onClick={handleFavoriteClick}
-                  disabled={isFavoriteLoading}
-                  aria-label={t('journal.favorite')}
-                >
-                  <Heart className={`h-5 w-5 ${isFavorited ? "fill-current" : ""}`} />
-                </Button>
-                <AddToFavoritesDialog
-                  open={isFavoritesDialogOpen}
-                  onOpenChange={setIsFavoritesDialogOpen}
-                  journal={journal}
-                />
-              </>
+              <AddToFavoritesDialog
+                open={isFavoritesDialogOpen}
+                onOpenChange={setIsFavoritesDialogOpen}
+                journal={journal}
+              />
             )}
           </div>
         </div>

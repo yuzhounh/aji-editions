@@ -86,5 +86,27 @@ service cloud.firestore {
       allow update: if isOwner(userId) && resource != null;
       allow delete: if isOwner(userId) && resource != null;
     }
+
+    /**
+     * @description Public read-only snapshots for shared journal lists.
+     * @path /shared_lists/{shareId}
+     */
+    match /shared_lists/{shareId} {
+      allow get: if resource.data.revoked == false
+                 && request.time < resource.data.expiresAt;
+      allow list: if false;
+      allow create: if request.auth != null
+                 && request.resource.data.ownerId == request.auth.uid
+                 && request.resource.data.revoked == false
+                 && request.resource.data.journalCount == request.resource.data.journalIds.size()
+                 && request.resource.data.journalCount > 0
+                 && request.resource.data.journalCount <= 2000;
+      allow update: if request.auth != null
+                 && resource.data.ownerId == request.auth.uid
+                 && request.resource.data.ownerId == resource.data.ownerId
+                 && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['revoked']);
+      allow delete: if request.auth != null
+                 && resource.data.ownerId == request.auth.uid;
+    }
   }
 }

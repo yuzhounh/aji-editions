@@ -16,44 +16,62 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirebase } from '@/firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { isDuplicateListName } from '@/lib/favorites-csv';
 
 interface RenameJournalListDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   listId: string;
   listName: string;
+  existingListNames?: string[];
 }
 
-export default function RenameJournalListDialog({ open, onOpenChange, listId, listName }: RenameJournalListDialogProps) {
+export default function RenameJournalListDialog({
+  open,
+  onOpenChange,
+  listId,
+  listName,
+  existingListNames = [],
+}: RenameJournalListDialogProps) {
   const { t } = useTranslation();
   const { toast } = useToast();
   const { user, firestore } = useFirebase();
   const [newName, setNewName] = useState(listName);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!user || !firestore || !listId || !newName.trim()) return;
 
-    setIsSaving(true);
-    onOpenChange(false); // Optimistic UI update
+    const trimmedName = newName.trim();
+    if (isDuplicateListName(trimmedName, existingListNames, listName)) {
+      toast({
+        variant: 'destructive',
+        title: t('favorites.renameList.errorTitle'),
+        description: t('favorites.duplicateListName'),
+      });
+      return;
+    }
 
-    const performSave = async () => {
-      try {
-        const listRef = doc(firestore, `users/${user.uid}/journal_lists`, listId);
-        await updateDoc(listRef, { name: newName.trim() });
-      } catch (error: any) {
-        console.error("Error renaming list:", error);
-        toast({
-          variant: 'destructive',
-          title: t('favorites.renameList.errorTitle'),
-          description: error.message,
-        });
-      } finally {
-        setIsSaving(false);
-      }
-    };
-    
-    performSave();
+    setIsSaving(true);
+
+    try {
+      const listRef = doc(firestore, `users/${user.uid}/journal_lists`, listId);
+      await updateDoc(listRef, { name: trimmedName });
+      onOpenChange(false);
+      toast({
+        title: t('favorites.renameList.successTitle'),
+        description: t('favorites.renameList.successDescription', { listName: trimmedName }),
+      });
+    } catch (error: any) {
+      console.error("Error renaming list:", error);
+      toast({
+        variant: 'destructive',
+        title: t('favorites.renameList.errorTitle'),
+        description: error.message,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (

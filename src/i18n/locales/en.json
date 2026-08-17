@@ -175,10 +175,14 @@
         },
         "empty": {
             "title": "No Favorites Yet",
-            "description": "You haven't created any journal lists yet. You can import a list from a CSV file.",
+            "description": "You haven't created any journal lists yet. Create a new list, import from CSV, or start favoriting journals from search.",
             "button": "Find Journals to Favorite"
         },
         "listEmpty": "This journal list is empty.",
+        "listCountPartial": "{{available}} of {{total}} journals in current edition",
+        "duplicateListName": "A list with this name already exists.",
+        "unavailableInEdition": "{{count}} favorited journals are not available in the current edition.",
+        "unavailableInEditionOnly": "All journals in this list are unavailable in the current edition.",
         "dialog": {
             "title": "Add to list...",
             "newListPlaceholder": "New list name...",
@@ -200,13 +204,24 @@
         },
         "renameList": {
             "title": "Rename list...",
+            "successTitle": "List Renamed",
+            "successDescription": "The list has been renamed to '{{listName}}'.",
             "errorTitle": "Error Renaming List",
             "ariaLabel": "Rename list {{listName}}"
+        },
+        "exportAll": {
+            "button": "Export All Lists",
+            "emptyTitle": "Nothing to Export",
+            "emptyDescription": "No journals in the current edition are available to export."
         },
         "importList": {
             "button": "Import from CSV",
             "successTitle": "Import Successful",
             "successDescription": "Created new list '{{listName}}' with {{count}} journals.",
+            "successDescriptionWithSkipped": "Created new list '{{listName}}' with {{count}} journals. {{skipped}} rows were skipped (not found in the current edition).",
+            "successDescriptionMulti": "Created {{listCount}} lists with {{count}} journals. {{skipped}} rows were skipped (not found in the current edition).",
+            "noMatchesTitle": "No Journals Imported",
+            "noMatchesDescription": "None of the ISSNs in this file match journals in the current edition.",
             "errorTitle": "Import Failed",
             "errorDescription": "Could not import the list. Please check the file format and try again."
         },
@@ -219,6 +234,7 @@
             "errorTitle": "Error Creating List"
         },
         "clearAll": {
+            "button": "Clear All Favorites",
             "menuItem": "Clear All Favorites",
             "title": "Clear All Favorites?",
             "description": "This action cannot be undone. This will permanently delete all of your journal lists and all of your favorited journals.",
@@ -284,7 +300,7 @@
             },
             "ai": {
                 "title": "AI-Powered Analysis",
-                "p1": "On each journal's detail page, click the 'Generate Analysis' button. Our AI assistant will provide a summary of the journal and suggest related publications."
+                "p1": "Opening a journal's detail page automatically loads AI-powered analysis, including a summary of the journal and related publication recommendations."
             }
         },
         "feedback": {
@@ -378,9 +394,47 @@
         "exportCsv": "Export as CSV",
         "error": "Error"
     },
+    "share": {
+        "loading": "Loading shared list...",
+        "notFound": "This share link is invalid or no longer exists.",
+        "revoked": "This share link has been revoked.",
+        "expired": "This share link has expired.",
+        "meta": "{{count}} journals · shared from {{edition}}",
+        "saveToFavorites": "Save to My Favorites",
+        "loginToSave": "Log in to Save",
+        "backHome": "Home",
+        "openFavorites": "Open Favorites",
+        "noVisibleJournals": "No journals from this list are available in the current edition.",
+        "create": {
+            "button": "Share Link",
+            "title": "Share List",
+            "description": "Anyone with this link can preview \"{{listName}}\" ({{count}} journals). Links expire after 90 days.",
+            "generating": "Creating link...",
+            "linkLabel": "Share link",
+            "expiryNote": "This link expires in 90 days. Anyone can preview the list; saving to favorites requires login.",
+            "copiedTitle": "Link Copied",
+            "copiedDescription": "The share link has been copied to your clipboard.",
+            "copyError": "Could not copy the link. Please copy it manually.",
+            "errorTitle": "Could Not Create Link",
+            "errorDescription": "Something went wrong while creating the share link."
+        },
+        "import": {
+            "successTitle": "List Saved",
+            "successDescription": "Created \"{{listName}}\" with {{count}} journals.",
+            "successDescriptionWithSkipped": "Created \"{{listName}}\" with {{count}} journals. {{skipped}} were not available in your current edition.",
+            "noMatchesTitle": "Nothing to Save",
+            "noMatchesDescription": "None of the journals in this list are available in your current edition.",
+            "errorTitle": "Save Failed",
+            "errorDescription": "Could not save this list to your favorites.",
+            "alreadySaved": "Saved as \"{{listName}}\"."
+        }
+    },
     "batchEdit": {
         "button": "Batch Edit",
         "selectAll": "Select All",
+        "selectPage": "Select page ({{count}})",
+        "selectAllInList": "Select all in list ({{count}})",
+        "selectAllResults": "Select all results ({{count}})",
         "deselectAll": "Deselect All",
         "selected": "{{count}} selected",
         "move": {
