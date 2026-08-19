@@ -1,4 +1,10 @@
-# [AJI Editions](https://github.com/yuzhounh/aji-editions)
+<p align="center">
+  <img src="public/favicon.svg" width="112" alt="AJI Editions icon" />
+</p>
+
+<h1 align="center">AJI Editions</h1>
+
+<p align="center"><strong>Compare academic journal rankings and impact factors across editions.</strong></p>
 
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
@@ -52,3 +58,7 @@ npm run build:editions -- --download
 Next.js 15 · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Firebase Auth
 
 Based on [yuzhounh/academic-journal-index](https://github.com/yuzhounh/academic-journal-index).
+
+## License
+
+This project is released under the [MIT License](LICENSE).
