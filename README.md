@@ -25,7 +25,7 @@ Pairing rule: each partition-backed edition pairs its partition table with the l
 | 2023 | CAS | FQBJCR2022 | 12,359 | JCR 2022 | JCR2021 | 2021 | 2022-12-21 | 2022-06-28 |
 | 2022 | CAS | FQBJCR2021 | 12,422 | JCR 2021 | JCR2020 | 2020 | 2021-12-20 | 2021-06-30 |
 
-2027 Edition is JCR-only until the XR 2026 partition table is released; IF and journal metadata come from JCR2025. XR 2026 Edition inherits open-access status from CAS 2025, then OpenAlex, with closed access as the default.
+2027 Edition is JCR-only until the XR 2027 partition table is released; IF and journal metadata come from JCR2025. XR 2026 Edition inherits open-access status from CAS 2025, then OpenAlex, with closed access as the default.
 
 ## Data pipeline
 
