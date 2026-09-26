@@ -6,6 +6,8 @@
 
 <p align="center"><strong>Compare academic journal rankings and impact factors across editions.</strong></p>
 
+<p align="center"><a href="LICENSE">MIT License</a></p>
+
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
 ## Editions
@@ -42,7 +44,9 @@ Raw data from [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR). Authority jou
 ## Development
 
 ```bash
-npm install
+git clone https://github.com/yuzhounh/aji-editions.git
+cd aji-editions
+npm ci
 npm run build:editions    # download missing CSVs and build all editions
 npm run dev               # http://localhost:9002
 ```
@@ -57,7 +61,10 @@ npm run build:editions -- --download
 
 Next.js 15 · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Firebase Auth
 
-Based on [yuzhounh/academic-journal-index](https://github.com/yuzhounh/academic-journal-index).
+## Related Projects
+
+- [academic-journal-index](https://github.com/yuzhounh/academic-journal-index): the current single-edition AJI application this project extends.
+- [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification): authority-level classification rules used by the edition pipeline.
 
 ## License
 
