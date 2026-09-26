@@ -6,6 +6,8 @@
 
 <p align="center"><strong>Compare academic journal rankings and impact factors across editions.</strong></p>
 
+<p align="center"><a href="LICENSE">MIT License</a></p>
+
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
 ## Editions
@@ -23,7 +25,7 @@ Pairing rule: each partition-backed edition pairs its partition table with the l
 | 2023 | CAS | FQBJCR2022 | 12,359 | JCR 2022 | JCR2021 | 2021 | 2022-12-21 | 2022-06-28 |
 | 2022 | CAS | FQBJCR2021 | 12,422 | JCR 2021 | JCR2020 | 2020 | 2021-12-20 | 2021-06-30 |
 
-2027 Edition is JCR-only until the XR 2026 partition table is released; IF and journal metadata come from JCR2025. XR 2026 Edition inherits open-access status from CAS 2025, then OpenAlex, with closed access as the default.
+2027 Edition is JCR-only until the XR 2027 partition table is released; IF and journal metadata come from JCR2025. XR 2026 Edition inherits open-access status from CAS 2025, then OpenAlex, with closed access as the default.
 
 ## Data pipeline
 
@@ -42,7 +44,9 @@ Raw data from [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR). Authority jou
 ## Development
 
 ```bash
-npm install
+git clone https://github.com/yuzhounh/aji-editions.git
+cd aji-editions
+npm ci
 npm run build:editions    # download missing CSVs and build all editions
 npm run dev               # http://localhost:9002
 ```
@@ -57,7 +61,10 @@ npm run build:editions -- --download
 
 Next.js 15 · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Firebase Auth
 
-Based on [yuzhounh/academic-journal-index](https://github.com/yuzhounh/academic-journal-index).
+## Related Projects
+
+- [academic-journal-index](https://github.com/yuzhounh/academic-journal-index): the current single-edition AJI application this project extends.
+- [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification): authority-level classification rules used by the edition pipeline.
 
 ## License
 
