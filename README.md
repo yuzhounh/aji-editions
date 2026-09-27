@@ -4,7 +4,14 @@
 
 <h1 align="center">AJI Editions</h1>
 
-<p align="center"><strong>Compare academic journal rankings and impact factors across editions.</strong></p>
+<p align="center">
+  <a href="https://aji-editions.pages.dev/"><img src="https://img.shields.io/badge/Online-Cloudflare_Pages-F38020?logo=cloudflare" alt="Cloudflare Pages online"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-f59e0b.svg" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+  <a href="https://aji-editions.pages.dev/">Open the live site</a>
+</p>
 
 <p align="center"><a href="LICENSE">MIT License</a></p>
 
