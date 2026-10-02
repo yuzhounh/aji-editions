@@ -88,6 +88,15 @@
   padding-right: 1rem;
 }
 
+@media (max-width: 767px) {
+  button:not([role="checkbox"]):not([role="switch"]), [role="option"], nav a { min-height: 44px; }
+  button:not([role="checkbox"]):not([role="switch"]) { min-width: 44px; }
+  input, textarea, select { font-size: 16px; }
+  [role="dialog"], [role="alertdialog"] { max-width: calc(100vw - 24px); max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; }
+  [role="dialog"].left-0 { width: min(360px, calc(100vw - 24px)); }
+  [role="dialog"] h2, [role="alertdialog"] h2 { padding-right: 32px; }
+}
+
 @media (min-width: 640px) {
   .page-shell {
     padding-left: 1.5rem;
