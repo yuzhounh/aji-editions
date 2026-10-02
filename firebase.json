@@ -1,4 +1,11 @@
 {
+  "hosting": {
+    "site": "aji-editions",
+    "public": "dist_pages",
+    "ignore": ["**/.*", "**/node_modules/**"],
+    "rewrites": [{"source": "**", "destination": "/index.html"}],
+    "headers": [{"source": "**", "headers": [{"key": "Cache-Control", "value": "no-cache"}]}]
+  },
   "firestore": [
     {
       "database": "ai-studio-academicjournali-346789f8-f2d1-4924-813d-95393c434b5a",

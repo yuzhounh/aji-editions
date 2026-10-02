@@ -71,6 +71,16 @@ Next.js 15 · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Firebase Au
 - [academic-journal-index](https://github.com/yuzhounh/academic-journal-index): the current single-edition AJI application this project extends.
 - [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification): authority-level classification rules used by the edition pipeline.
 
+## Hosting
+
+Vercel and Netlify run the complete Next.js application, including summaries and `/share/[id]`. Vercel uses `npm run build`; Netlify uses the same command with its Next.js adapter and `.next/` output.
+
+```bash
+npm run build:landing
+```
+
+This prepares `dist_pages/` as an entry page for GitHub Pages, Firebase Hosting, and Cloudflare Pages. These static entries redirect to `https://aji-editions.vercel.app`, preserving share paths, query parameters, and fragments. They depend on the full Next.js site rather than pretending to be independent static exports. The Pages workflow and Firebase Hosting configuration use this generated package; Firestore configuration is retained separately.
+
 ## License
 
 This project is released under the [MIT License](LICENSE).

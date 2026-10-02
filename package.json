@@ -12,6 +12,7 @@
     "build:summaries": "tsx scripts/build-summaries.ts",
     "pack:summaries": "tsx scripts/pack-summaries.ts",
     "build": "next build",
+    "build:landing": "node scripts/build-landing.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
