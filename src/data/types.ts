@@ -40,6 +40,12 @@ export type JournalDataset = {
   journals: Journal[];
 };
 
+export type EditionsManifest = {
+  schemaVersion: 1;
+  sha256: string;
+  url: string;
+};
+
 export type EditionsCollection = {
   version: string;
   generatedAt: string;

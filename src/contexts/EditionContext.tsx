@@ -52,19 +52,18 @@ function EditionProviderInner({
     collection.editions.find((edition) => edition.id === currentEditionId) ??
     collection.editions[0];
 
-  if (!currentEdition) {
-    throw new Error("No editions available.");
-  }
-
   const value = React.useMemo(
-    () => ({
-      editions: collection.editions,
-      currentEdition,
-      currentEditionId: currentEdition.id,
-      setEditionId,
-      journals: currentEdition.journals,
-      isLoading: false,
-    }),
+    () => {
+      if (!currentEdition) throw new Error("No editions available.");
+      return {
+        editions: collection.editions,
+        currentEdition,
+        currentEditionId: currentEdition.id,
+        setEditionId,
+        journals: currentEdition.journals,
+        isLoading: false,
+      };
+    },
     [collection.editions, currentEdition, setEditionId]
   );
 
@@ -78,10 +77,12 @@ export function EditionProvider({ children }: EditionProviderProps) {
   const [collection, setCollection] = React.useState<EditionsCollection | null>(
     null
   );
-  const [error, setError] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<unknown>(null);
+  const [attempt, setAttempt] = React.useState(0);
 
   React.useEffect(() => {
     let cancelled = false;
+    setError(null);
 
     loadEditionsCollectionClient()
       .then((loaded) => {
@@ -91,21 +92,22 @@ export function EditionProvider({ children }: EditionProviderProps) {
       })
       .catch((loadError: unknown) => {
         if (!cancelled) {
-          setError(
-            loadError instanceof Error ? loadError.message : t("edition.loadError")
-          );
+          setError(loadError instanceof Error ? loadError : new Error("Failed to load edition data"));
         }
       });
 
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [attempt]);
 
   if (error) {
     return (
-      <div className="flex min-h-[50vh] w-full items-center justify-center px-6 text-center">
-        <p className="text-sm text-destructive">{error}</p>
+      <div className="flex min-h-[50vh] w-full flex-col items-center justify-center gap-3 px-6 text-center">
+        <p className="text-sm text-destructive" role="alert">{t("edition.loadError")}</p>
+        <button type="button" className="rounded-md border px-4 py-2 text-sm" onClick={() => setAttempt((value) => value + 1)}>
+          {t("edition.retry")}
+        </button>
       </div>
     );
   }

@@ -3,8 +3,8 @@
 import { firebaseConfig, firestoreDatabaseId } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, initializeFirestore, doc, DocumentReference } from 'firebase/firestore'
-import { addDocumentNonBlocking as originalAddDocumentNonBlocking } from './non-blocking-updates';
+import { getFirestore, initializeFirestore, CollectionReference, DocumentData, DocumentReference } from 'firebase/firestore'
+import { addDocumentNonBlocking as originalAddDocumentNonBlocking, setDocumentNonBlocking } from './non-blocking-updates';
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -35,18 +35,14 @@ export function getSdks(firebaseApp: FirebaseApp) {
 }
 
 // Overload for addDocumentNonBlocking to accept a DocumentReference
-export function addDocumentNonBlocking(docRef: DocumentReference, data: any): void;
-export function addDocumentNonBlocking(colRef: any, data: any): any {
-    if (docRef instanceof DocumentReference) {
-        // This is a simplified version. The original non-blocking-updates
-        // would need to be updated to handle setDoc with a DocumentReference.
-        // For now, we'll just call the original implementation but it might not be perfect.
-        // This is a stand-in for a proper implementation.
-        const { setDocumentNonBlocking } = require('./non-blocking-updates');
-        setDocumentNonBlocking(docRef, data, {});
+export function addDocumentNonBlocking(docRef: DocumentReference, data: DocumentData): void;
+export function addDocumentNonBlocking(colRef: CollectionReference, data: DocumentData): ReturnType<typeof originalAddDocumentNonBlocking>;
+export function addDocumentNonBlocking(targetRef: DocumentReference | CollectionReference, data: DocumentData) {
+    if (targetRef.type === 'document') {
+        setDocumentNonBlocking(targetRef, data, {});
         return;
     }
-    return originalAddDocumentNonBlocking(colRef, data);
+    return originalAddDocumentNonBlocking(targetRef, data);
 }
 
 

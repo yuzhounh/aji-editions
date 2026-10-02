@@ -11,6 +11,13 @@ import path from "path";
 import zlib from "zlib";
 import Papa from "papaparse";
 import type { Journal, JournalDataset } from "../src/data/types";
+import { normalizeIssnPart, splitIssnParts } from "@aji/core";
+
+// This legacy command writes a single-edition file, not an EditionsCollection.
+type SingleEditionDataset = Pick<JournalDataset,
+  "version" | "partitionYear" | "impactFactorYear" | "source" |
+  "generatedAt" | "journalCount" | "journals"
+>;
 
 const ROOT = path.resolve(__dirname, "..");
 const RAW_DIR = path.join(ROOT, "data", "raw");
@@ -65,8 +72,8 @@ function calculateAuthorityLevel(
 }
 
 function splitIssn(value: string): { issn: string; eissn: string } {
-  const [issn = "", eissn = ""] = value.split("/");
-  return { issn: issn.trim(), eissn: eissn.trim() };
+  const { print, electronic } = splitIssnParts(value);
+  return { issn: print, eissn: electronic };
 }
 
 function collectMinorCategories(row: CsvRow): Journal["minorCategories"] {
@@ -130,8 +137,8 @@ function buildImpactFactorMap(jcrRows: CsvRow[]): Map<string, number | string> {
     const impactFactor = parseImpactFactor(row[ifColumn]);
     if (impactFactor === "") continue;
 
-    const issn = row.ISSN?.trim();
-    const eissn = row.eISSN?.trim();
+    const issn = normalizeIssnPart(row.ISSN);
+    const eissn = normalizeIssnPart(row.eISSN);
 
     if (issn) map.set(issn, impactFactor);
     if (eissn) map.set(eissn, impactFactor);
@@ -242,7 +249,7 @@ async function ensureRawFiles(forceDownload: boolean): Promise<void> {
   }
 }
 
-function writeDataset(dataset: JournalDataset): void {
+function writeDataset(dataset: SingleEditionDataset): void {
   const json = JSON.stringify(dataset);
   fs.mkdirSync(path.dirname(OUTPUT_JSON), { recursive: true });
   fs.writeFileSync(OUTPUT_JSON, json, "utf8");
@@ -266,7 +273,7 @@ async function main(): Promise<void> {
   let journals: Journal[] = [];
   const partitionYear = 2025;
   let impactFactorYear = 2024;
-  let source = {
+  let source: SingleEditionDataset["source"] = {
     partition: RAW_FILES.partition,
     impactFactor: RAW_FILES.impactFactor,
   };
@@ -300,7 +307,7 @@ async function main(): Promise<void> {
     console.log(`Matched impact factors: ${matched}/${journals.length}`);
   }
 
-  const dataset: JournalDataset = {
+  const dataset: SingleEditionDataset = {
     version: "1.0",
     partitionYear,
     impactFactorYear,

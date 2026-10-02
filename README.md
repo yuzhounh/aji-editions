@@ -43,7 +43,9 @@ npm run build:editions
         ↓
 src/data/editions/editions.json.gz  (+ public/data/editions.json.gz)
         ↓
-Client loads /data/editions.json.gz → Edition switcher in UI
+npm run pack:editions → public/data/editions.<sha256>.json.gz + editions-manifest.json
+        ↓
+Client revalidates the manifest → caches the versioned dataset → Edition switcher in UI
 ```
 
 Raw data from [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR). Authority journal levels computed using [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification) rules.
@@ -54,8 +56,13 @@ Raw data from [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR). Authority jou
 git clone https://github.com/yuzhounh/aji-editions.git
 cd aji-editions
 npm ci
-npm run build:editions    # download missing CSVs and build all editions
-npm run dev               # http://localhost:9002
+npm run dev               # package existing data; http://localhost:9002
+```
+
+The committed dataset is sufficient for development and application builds. Regenerate it only when updating source data:
+
+```bash
+npm run build:editions
 ```
 
 To force re-download raw CSVs:
@@ -63,6 +70,30 @@ To force re-download raw CSVs:
 ```bash
 npm run build:editions -- --download
 ```
+
+### Build, caching, and validation
+
+```bash
+npm run check  # TypeScript, ESLint, and regression tests
+npm run build # package existing data, then build with type/lint checks
+npm start
+```
+
+GitHub Actions runs the checks and production build on Node.js 22. `predev` and `prebuild` generate the manifest and content-hashed asset from the existing compressed dataset; these generated files are gitignored. Dataset rebuilds also package the new version. Deploy the manifest and its referenced asset together from the same build output.
+
+The manifest uses `Cache-Control: no-cache`; hashed datasets use `public, max-age=31536000, immutable`. Next.js config provides these headers for its server, and `public/_headers` describes the equivalent Cloudflare static-hosting policy. A platform adapter must preserve the generated assets and headers. Other hosting platforms need equivalent header rules; an application build alone does not validate a cloud deployment.
+
+The client shares an in-flight request and the decoded collection within each page session. Language and edition switches reuse that collection. Failed loads are evicted and expose a Retry button. Reloading revalidates the manifest and uses a new URL when the dataset changes. This version still loads all editions together to support history views; splitting by year is a separate optimization if slow-network or mobile measurements justify it.
+
+ISSN and JCR release-year rules come from the versioned local `@aji/core` package in `vendor/aji-core/`. The single-edition application vendors the same reviewed version. See [the core maintenance instructions](vendor/aji-core/README.md) for the sync command and favorites-ID compatibility policy.
+
+### Production deployment
+
+Vercel builds the complete Next.js application from `main`. Netlify uses `netlify.toml` and its automatically managed Next.js adapter; deploy with `netlify deploy --prod --context production --site aji-editions`.
+
+Cloudflare Pages retains its existing domain as a gateway to the Vercel runtime, including Server Actions and shared-list routes. Run `npm run pack:pages`, then `wrangler pages deploy .pages --project-name aji-editions --branch main`. Manifest and dataset cache headers pass through from Vercel. The gateway does not contain secrets. Deploy Vercel first.
+
+Firebase Hosting is an entry-point redirect to Vercel because its existing project has no billing enabled. Run `firebase deploy --only hosting --project aji-editions`; this command does not deploy Firestore rules or functions. GitHub Pages is currently disabled for this repository.
 
 ## Tech stack
 

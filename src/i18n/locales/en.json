@@ -249,6 +249,7 @@
         "currentLabel": "Current edition",
         "loading": "Loading edition data...",
         "loadError": "Failed to load edition data.",
+        "retry": "Retry",
         "jcrOnlyNote": "JCR impact factors only; partition data not yet available.",
         "jcrOnlyBrowseUnavailable": "This edition provides JCR impact factors only. Category browse is not available."
     },

@@ -1,12 +1,22 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['aji-editions.pages.dev'],
+    },
   },
-  eslint: {
-    ignoreDuringBuilds: true,
+  async headers() {
+    return [
+      {
+        source: '/data/editions-manifest.json',
+        headers: [{ key: 'Cache-Control', value: 'no-cache' }],
+      },
+      {
+        source: '/data/editions.:hash([a-f0-9]+).json.gz',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+    ];
   },
   outputFileTracingIncludes: {
     '/**/*': [

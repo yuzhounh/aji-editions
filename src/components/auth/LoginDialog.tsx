@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -320,8 +320,7 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
 }
 
 interface AuthFormProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    form: any;
+    form: UseFormReturn<FormValues>;
     onSubmit: (data: FormValues) => Promise<void>;
     isLoading: boolean;
     buttonText: string;

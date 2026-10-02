@@ -9,6 +9,7 @@ import {
   type EditionDefinition,
 } from "../src/data/edition-config";
 import { combineIssnParts, normalizeIssnPart } from "../src/lib/issn";
+import { packEditionAssets } from "./edition-assets";
 
 const ROOT = path.resolve(__dirname, "..");
 const RAW_DIR = path.join(ROOT, "data", "raw");
@@ -917,6 +918,7 @@ function writeCollection(collection: EditionsCollection): void {
   fs.writeFileSync(OUTPUT_GZ, gzBuffer);
   fs.mkdirSync(path.dirname(PUBLIC_OUTPUT_GZ), { recursive: true });
   fs.writeFileSync(PUBLIC_OUTPUT_GZ, gzBuffer);
+  packEditionAssets(ROOT, gzBuffer);
 
   const totalJournals = collection.editions.reduce(
     (sum, edition) => sum + edition.journalCount,

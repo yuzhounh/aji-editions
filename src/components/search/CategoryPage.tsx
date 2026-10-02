@@ -3,6 +3,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useState, useMemo, useCallback } from "react";
 import type { Journal } from "@/data/journals";
 import { AjiLogo } from "@/components/brand/AjiLogo";
@@ -963,9 +964,9 @@ export default function CategoryPage() {
                               Main navigation menu
                             </SheetDescription>
                           </SheetHeader>
-                          <a href="/">
+                          <Link href="/">
                             <AjiLogo />
-                          </a>
+                          </Link>
                         </div>
                         <div className="mt-6">
                           <EditionSwitcher className="w-full" />
@@ -976,9 +977,9 @@ export default function CategoryPage() {
                       </SheetContent>
                   </Sheet>
               </div>
-              <a href="/" className="hidden sm:flex items-center">
+              <Link href="/" className="hidden sm:flex items-center">
                 <AjiLogo />
-              </a>
+              </Link>
               {desktopNavItems}
             </div>
             

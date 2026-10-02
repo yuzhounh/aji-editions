@@ -155,7 +155,7 @@ function IfHistoryChart({
             isAnimationActive={false}
             dot={({ cx, cy, payload }) => {
               const point = payload as { isCurrent?: boolean; display?: string };
-              if (cx == null || cy == null) return null;
+              if (cx == null || cy == null) return <g />;
               return (
                 <circle
                   key={`${cx}-${cy}`}

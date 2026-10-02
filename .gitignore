@@ -14,6 +14,9 @@
 
 # production
 /build
+/.pages/
+/.netlify/
+/.firebase/
 
 # misc
 .DS_Store
@@ -43,5 +46,7 @@ next-env.d.ts
 /src/data/journals.json
 /src/data/editions/editions.json
 /public/data/editions.json
+/public/data/editions.*.json.gz
+/public/data/editions-manifest.json
 
 .vercel
