@@ -16,6 +16,7 @@
     "pack:editions": "tsx scripts/pack-editions.ts",
     "build": "next build",
     "pack:pages": "node scripts/pack-pages.mjs https://aji-editions.vercel.app",
+    "build:landing": "node scripts/build-landing.mjs",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

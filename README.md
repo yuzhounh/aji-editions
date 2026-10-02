@@ -93,7 +93,7 @@ Vercel builds the complete Next.js application from `main`. Netlify uses `netlif
 
 Cloudflare Pages retains its existing domain as a gateway to the Vercel runtime, including Server Actions and shared-list routes. Run `npm run pack:pages`, then `wrangler pages deploy .pages --project-name aji-editions --branch main`. Manifest and dataset cache headers pass through from Vercel. The gateway does not contain secrets. Deploy Vercel first.
 
-Firebase Hosting is an entry-point redirect to Vercel because its existing project has no billing enabled. Run `firebase deploy --only hosting --project aji-editions`; this command does not deploy Firestore rules or functions. GitHub Pages is currently disabled for this repository.
+Firebase Hosting is an entry-point redirect to Vercel because its existing project has no billing enabled. Run `firebase deploy --only hosting --project aji-editions`; this command does not deploy Firestore rules or functions.
 
 ## Tech stack
 
@@ -103,6 +103,16 @@ Next.js 15 · React 18 · TypeScript · Tailwind CSS · shadcn/ui · Firebase Au
 
 - [academic-journal-index](https://github.com/yuzhounh/academic-journal-index): the current single-edition AJI application this project extends.
 - [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification): authority-level classification rules used by the edition pipeline.
+
+## Hosting
+
+Vercel and Netlify run the complete Next.js application, including summaries and `/share/[id]`. Vercel uses `npm run build`; Netlify uses the same command with its Next.js adapter and `.next/` output.
+
+```bash
+npm run build:landing
+```
+
+This prepares `dist_pages/` as the GitHub Pages entry, redirecting to `https://aji-editions.vercel.app` while preserving share paths, query parameters, and fragments. The Pages workflow publishes this generated package. Cloudflare uses the gateway described above; Firebase uses HTTP redirects. These entry points depend on Vercel's complete runtime.
 
 ## License
 

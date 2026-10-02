@@ -36,6 +36,11 @@ pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo
+dist_pages/
+.landing-build/
+.netlify/
+.firebase/
+.wrangler/
 next-env.d.ts
 
 # journal data pipeline
