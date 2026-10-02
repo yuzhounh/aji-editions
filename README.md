@@ -1,19 +1,20 @@
 <p align="center">
-  <img src="public/favicon.svg" width="112" alt="AJI Editions icon" />
+  <img src="public/favicon.svg" width="112" alt="AJI Editions logo">
 </p>
 
 <h1 align="center">AJI Editions</h1>
 
+<p align="center"><strong>Explore academic journals across paired JCR and CAS/XR editions.</strong></p>
+
 <p align="center">
-  <a href="https://aji-editions.pages.dev/"><img src="https://img.shields.io/badge/Online-Cloudflare_Pages-F38020?logo=cloudflare" alt="Cloudflare Pages online"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-f59e0b.svg" alt="License: MIT"></a>
+  <a href="https://aji-editions.pages.dev/"><img src="https://img.shields.io/badge/Website-Cloudflare%20Pages-f38020?style=flat&amp;logo=cloudflare&amp;logoColor=white" alt="Website: Cloudflare Pages"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-f59e0b?style=flat" alt="License: MIT"></a>
+  <img src="https://img.shields.io/badge/Next.js-React-222222?style=flat&amp;logo=nextdotjs&amp;logoColor=white" alt="Next.js: React">
 </p>
 
 <p align="center">
-  <a href="https://aji-editions.pages.dev/">Open the live site</a>
+  <a href="https://aji-editions.pages.dev/">Live site</a> · <a href="https://github.com/yuzhounh/aji-editions/releases/latest">Latest release</a> · <a href="#development">Get started</a> · <a href="LICENSE">License</a>
 </p>
-
-<p align="center"><a href="LICENSE">MIT License</a></p>
 
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
