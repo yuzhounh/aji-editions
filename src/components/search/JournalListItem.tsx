@@ -141,7 +141,7 @@ export default function JournalListItem({ journal, onClick, isEditing, isSelecte
                 aria-label={`Select journal ${journal.journalName}`}
             />
         )}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6 w-full min-w-0">
+        <div className="journal-list-layout flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-6 w-full min-w-0">
             <div className="min-w-0 flex-1">
               <p className="font-headline text-base md:text-lg font-semibold leading-snug truncate">{journal.journalName}</p>
               <IssnMetadataRow
@@ -151,7 +151,7 @@ export default function JournalListItem({ journal, onClick, isEditing, isSelecte
               />
             </div>
 
-            <div className="flex items-start gap-6 md:gap-8 shrink-0 md:pl-4 md:border-l md:border-border/60">
+            <div className="journal-list-metrics flex items-start gap-6 md:gap-8 shrink-0 md:pl-4 md:border-l md:border-border/60">
                 <div className="flex flex-col items-start md:items-end min-w-[72px]">
                     <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none h-4 flex items-center">{t('journal.impactFactor')}</p>
                     <div className="mt-1 h-7 flex items-center">

@@ -236,7 +236,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
       />
 
       <div className="space-y-6">
-        <div className={`grid grid-cols-1 ${hasPartition ? "lg:grid-cols-3" : ""} gap-6`}>
+        <div className={`grid grid-cols-1 ${hasPartition ? "journal-detail-grid lg:grid-cols-3" : ""} gap-6`}>
             <Card className={hasPartition ? "lg:col-span-1" : ""}>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl font-headline">
@@ -256,7 +256,7 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
             </Card>
             
             {hasPartition && (
-            <Card className="lg:col-span-2">
+            <Card className="journal-detail-partition lg:col-span-2">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-xl font-headline">
                         <Award className="text-primary"/>

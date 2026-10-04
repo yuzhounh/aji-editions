@@ -812,7 +812,7 @@ export default function CategoryPage() {
   );
 
   const desktopNavItems = (
-    <nav className="hidden sm:flex items-center p-1 bg-muted/80 rounded-lg ring-1 ring-border/40">
+    <nav className="journal-desktop-nav hidden sm:flex items-center p-1 bg-muted/80 rounded-lg ring-1 ring-border/40">
       {navViewItems.map(({ id, labelKey }) => (
         <button
           key={id}
@@ -945,10 +945,10 @@ export default function CategoryPage() {
   return (
     <>
       <div className="page-shell flex min-h-screen flex-col">
-        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
+        <header className="journal-header sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
-              <div className="sm:hidden">
+              <div className="journal-menu-trigger sm:hidden">
                   <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                       <SheetTrigger asChild>
                           <Button variant="outline" size="icon">
@@ -956,7 +956,7 @@ export default function CategoryPage() {
                               <span className="sr-only">Open menu</span>
                           </Button>
                       </SheetTrigger>
-                      <SheetContent side="left" className="pt-8 w-[58vw] max-w-[250px] px-2 py-3 gap-3">
+                      <SheetContent side="left" className="journal-navigation-sheet pt-8 w-[58vw] max-w-[250px] px-2 py-3 gap-3">
                         <div>
                           <SheetHeader>
                             <SheetTitle className="sr-only">Menu</SheetTitle>
@@ -977,7 +977,7 @@ export default function CategoryPage() {
                       </SheetContent>
                   </Sheet>
               </div>
-              <Link href="/" className="hidden sm:flex items-center">
+              <Link href="/" className="journal-header-brand hidden sm:flex items-center">
                 <AjiLogo />
               </Link>
               {desktopNavItems}
