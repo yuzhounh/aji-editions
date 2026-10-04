@@ -113,12 +113,16 @@
 }
 
 /* Tablet touch controls; fold navigation and detail columns only when needed. */
-@media (min-width: 744px) and (max-width: 819px) and (min-height: 600px) and (pointer: coarse) {
-  .journal-stats-stacked { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
+@media (min-width: 744px) and (max-width: 859px) and (min-height: 600px) and (pointer: coarse) {
+  .page-shell .journal-stats-stacked { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; }
   .journal-stats-stacked > div { display: flex; flex-direction: column; }
   .journal-stats-stacked > div > :last-child { margin-top: auto; padding-top: 1rem; }
   .journal-stats-stacked > :last-child { grid-column: 1 / -1; }
-  .journal-stats-desktop { display: none; }
+  .page-shell .journal-stats-desktop { display: none; }
+}
+
+@media (min-width: 860px) and (max-width: 959px) and (min-height: 600px) and (pointer: coarse) {
+  .page-shell .journal-stats-desktop { column-gap: 1rem; }
 }
 
 @media (min-width: 744px) and (min-height: 600px) and (pointer: coarse) {

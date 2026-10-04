@@ -179,7 +179,7 @@ function StatsBody({ journals }: { journals: Journal[] }) {
           <p className="text-4xl font-bold tabular-nums">{totalJournals}</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-y-6 md:hidden">
+      <div className="journal-stats-stacked grid grid-cols-1 gap-y-6 md:hidden">
         {allStats.map(stat => (
           <div key={stat.title}>
             <StatsDetails title={stat.title} data={stat.data} total={totalJournals} />
@@ -190,7 +190,7 @@ function StatsBody({ journals }: { journals: Journal[] }) {
         ))}
       </div>
       
-      <div className="hidden md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-6">
+      <div className="journal-stats-desktop hidden md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-6">
           <StatsDetails title={statsPartitionTitle} data={partitionData} total={totalJournals} />
           <StatsDetails title={t('stats.authorityTitle')} data={authorityData} total={totalJournals} />
           <StatsDetails title={t('stats.oaTitle')} data={openAccessData} total={totalJournals} />
