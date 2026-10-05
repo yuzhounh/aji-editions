@@ -28,6 +28,7 @@ import {
   SheetTitle,
   SheetDescription,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { ArrowLeft, BookOpen, Menu, Folder, Download, Pencil, X, Check, Trash2, FolderSync, Heart, Info, Star, Search as SearchIcon, Share2 } from "lucide-react";
 import JournalDetail from "./JournalDetail";
@@ -971,12 +972,17 @@ export default function CategoryPage() {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[72vw] max-w-[248px] rounded-l-2xl p-5 flex flex-col justify-between overflow-y-auto">
+                <SheetContent side="right" hideClose className="w-[72vw] max-w-[248px] rounded-l-2xl p-5 flex flex-col justify-between overflow-y-auto">
                   <div className="flex flex-col gap-4">
-                    <SheetHeader className="text-left pb-2 border-b">
+                    <SheetHeader className="text-left pb-3 border-b flex flex-row items-center justify-between space-y-0">
                       <SheetTitle className="text-base font-semibold flex items-center gap-2">
                         <AjiLogo />
                       </SheetTitle>
+                      <SheetClose asChild>
+                        <Button variant="outline" size="icon" aria-label="关闭菜单">
+                          <X className="h-5 w-5" />
+                        </Button>
+                      </SheetClose>
                       <SheetDescription className="sr-only">
                         Main navigation and preferences menu
                       </SheetDescription>
