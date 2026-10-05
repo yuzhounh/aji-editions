@@ -3,7 +3,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { useState, useMemo, useCallback } from "react";
 import type { Journal } from "@/data/journals";
 import { AjiLogo } from "@/components/brand/AjiLogo";
@@ -798,10 +797,12 @@ export default function CategoryPage() {
         <Button
           key={id}
           onClick={() => handleViewChange(id)}
-          variant={view === id ? "secondary" : "ghost"}
+          variant="ghost"
           className={cn(
-            "w-full justify-start text-base py-3 px-1.5",
-            view === id && "bg-background shadow-sm ring-1 ring-border/50"
+            "w-full justify-start text-base py-2.5 px-3 rounded-lg transition-colors",
+            view === id
+              ? "bg-muted font-semibold text-primary"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
           )}
         >
           <Icon className="mr-3 h-5 w-5" />
@@ -812,7 +813,7 @@ export default function CategoryPage() {
   );
 
   const desktopNavItems = (
-    <nav className="journal-desktop-nav hidden sm:flex items-center p-1 bg-muted/80 rounded-lg ring-1 ring-border/40">
+    <nav className="hidden min-[820px]:flex items-center p-1 bg-muted/80 rounded-lg ring-1 ring-border/40">
       {navViewItems.map(({ id, labelKey }) => (
         <button
           key={id}
@@ -945,49 +946,74 @@ export default function CategoryPage() {
   return (
     <>
       <div className="page-shell flex min-h-screen flex-col">
-        <header className="journal-header sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
+        <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
-              <div className="journal-menu-trigger sm:hidden">
-                  <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                      <SheetTrigger asChild>
-                          <Button variant="outline" size="icon">
-                              <Menu className="h-5 w-5" />
-                              <span className="sr-only">Open menu</span>
-                          </Button>
-                      </SheetTrigger>
-                      <SheetContent side="left" className="journal-navigation-sheet pt-8 w-[58vw] max-w-[250px] px-2 py-3 gap-3">
-                        <div>
-                          <SheetHeader>
-                            <SheetTitle className="sr-only">Menu</SheetTitle>
-                            <SheetDescription className="sr-only">
-                              Main navigation menu
-                            </SheetDescription>
-                          </SheetHeader>
-                          <Link href="/">
-                            <AjiLogo />
-                          </Link>
-                        </div>
-                        <div className="mt-6">
-                          <EditionSwitcher className="w-full" />
-                        </div>
-                        <div className="mt-6 flex flex-col gap-1">
-                          {navItems}
-                        </div>
-                      </SheetContent>
-                  </Sheet>
-              </div>
-              <Link href="/" className="journal-header-brand hidden sm:flex items-center">
+              <a href="/" className="flex items-center">
                 <AjiLogo />
-              </Link>
+              </a>
               {desktopNavItems}
             </div>
-            
-            <div className="flex items-center justify-end gap-2">
-              <EditionSwitcher className="hidden sm:flex" />
+
+            {/* Desktop Header Actions */}
+            <div className="hidden min-[820px]:flex items-center justify-end gap-2">
+              <EditionSwitcher />
               <LanguageToggle />
               <ThemeToggle />
               <UserAvatar onLoginClick={() => setIsLoginDialogOpen(true)} />
+            </div>
+
+            {/* Mobile Top-Right Hamburger Menu */}
+            <div className="min-[820px]:hidden flex items-center">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="打开菜单">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[72vw] max-w-[248px] rounded-l-2xl p-0 flex flex-col justify-between overflow-hidden">
+                  <div className="flex flex-col">
+                    <SheetHeader className="px-4 py-3.5 border-b border-border/70 text-left shrink-0">
+                      <SheetTitle className="text-base font-semibold flex items-center gap-2">
+                        <AjiLogo />
+                      </SheetTitle>
+                      <SheetDescription className="sr-only">
+                        Main navigation and preferences menu
+                      </SheetDescription>
+                    </SheetHeader>
+
+                    {/* Edition Switcher */}
+                    <div className="flex flex-col gap-1.5 px-4 pt-3.5">
+                      <span className="text-xs font-medium text-muted-foreground">数据版本</span>
+                      <EditionSwitcher className="w-full" />
+                    </div>
+
+                    {/* Navigation Items */}
+                    <div className="flex flex-col gap-1.5 px-4 pt-3">
+                      <span className="text-xs font-medium text-muted-foreground">页面导航</span>
+                      <div className="flex flex-col gap-1">
+                        {navItems}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Settings (Theme, Language, User Account) */}
+                  <div className="px-4 py-3.5 border-t border-border/70 flex flex-col gap-3 shrink-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">语言 / Language</span>
+                      <LanguageToggle />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">外观主题</span>
+                      <ThemeToggle />
+                    </div>
+                    <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                      <span className="text-sm text-muted-foreground">账户与同步</span>
+                      <UserAvatar onLoginClick={() => { setMobileMenuOpen(false); setIsLoginDialogOpen(true); }} />
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </div>
           </div>
         </header>
