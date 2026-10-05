@@ -971,9 +971,9 @@ export default function CategoryPage() {
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[72vw] max-w-[248px] rounded-l-2xl p-0 flex flex-col justify-between overflow-hidden">
-                  <div className="flex flex-col">
-                    <SheetHeader className="px-4 py-3.5 border-b border-border/70 text-left shrink-0">
+                <SheetContent side="right" className="w-[72vw] max-w-[248px] rounded-l-2xl p-5 flex flex-col justify-between overflow-y-auto">
+                  <div className="flex flex-col gap-4">
+                    <SheetHeader className="text-left pb-2 border-b">
                       <SheetTitle className="text-base font-semibold flex items-center gap-2">
                         <AjiLogo />
                       </SheetTitle>
@@ -983,13 +983,13 @@ export default function CategoryPage() {
                     </SheetHeader>
 
                     {/* Edition Switcher */}
-                    <div className="flex flex-col gap-1.5 px-4 pt-3.5">
+                    <div className="flex flex-col gap-1.5">
                       <span className="text-xs font-medium text-muted-foreground">数据版本</span>
                       <EditionSwitcher className="w-full" />
                     </div>
 
                     {/* Navigation Items */}
-                    <div className="flex flex-col gap-1.5 px-4 pt-3">
+                    <div className="flex flex-col gap-1.5 pt-1">
                       <span className="text-xs font-medium text-muted-foreground">页面导航</span>
                       <div className="flex flex-col gap-1">
                         {navItems}
@@ -998,7 +998,7 @@ export default function CategoryPage() {
                   </div>
 
                   {/* Bottom Settings (Theme, Language, User Account) */}
-                  <div className="px-4 py-3.5 border-t border-border/70 flex flex-col gap-3 shrink-0">
+                  <div className="pt-4 border-t flex flex-col gap-3 mt-6">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">语言 / Language</span>
                       <LanguageToggle />
@@ -1007,7 +1007,7 @@ export default function CategoryPage() {
                       <span className="text-sm text-muted-foreground">外观主题</span>
                       <ThemeToggle />
                     </div>
-                    <div className="pt-2 border-t border-border/60 flex items-center justify-between">
+                    <div className="pt-2 border-t flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">账户与同步</span>
                       <UserAvatar onLoginClick={() => { setMobileMenuOpen(false); setIsLoginDialogOpen(true); }} />
                     </div>

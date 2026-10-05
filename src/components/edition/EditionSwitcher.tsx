@@ -81,7 +81,7 @@ export default function EditionSwitcher({
       <SelectTrigger
         className={cn(
           "h-10 gap-1.5 border-border/70 bg-background/80 px-2.5 py-0",
-          compact ? "w-[136px]" : "w-[142px] sm:w-[158px]",
+          !className?.includes("w-") && (compact ? "w-[136px]" : "w-[142px] sm:w-[158px]"),
           className
         )}
         aria-label={t("edition.switcherLabel")}
