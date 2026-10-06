@@ -203,10 +203,12 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
                 type="button"
                 variant="outline"
                 size="sm"
+                aria-label={t("journal.viewHistory")}
+                title={t("journal.viewHistory")}
                 onClick={() => setIsHistoryOpen(true)}
               >
-                <LineChart className="mr-2 h-4 w-4" />
-                {t("journal.viewHistory")}
+                <LineChart className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{t("journal.viewHistory")}</span>
               </Button>
             )}
             <Button
