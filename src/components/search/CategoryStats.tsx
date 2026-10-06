@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Journal } from "@/data/journals";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -212,6 +212,11 @@ function StatsBody({ journals }: { journals: Journal[] }) {
 export default function CategoryStats({ journals, collapsible = false, defaultOpen = true }: CategoryStatsProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(defaultOpen);
+
+  // On phones the statistics start collapsed to keep the result list in view.
+  useEffect(() => {
+    if (window.innerWidth < 768) setOpen(false);
+  }, []);
   const { totalJournals, partitionData, openAccessData } = useStatsData(journals);
 
   const topPartition = partitionData.reduce(

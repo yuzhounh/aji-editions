@@ -123,10 +123,10 @@ function IfHistoryChart({
 
   return (
     <div className="space-y-3">
-      <ChartContainer config={ifChartConfig} className="h-[300px] w-full">
+      <ChartContainer config={ifChartConfig} className="h-[240px] w-full sm:h-[300px]">
         <LineChart
           data={numericPoints}
-          margin={{ top: 32, right: 12, left: 0, bottom: 0 }}
+          margin={{ top: 28, right: 20, left: 0, bottom: 0 }}
         >
           <CartesianGrid vertical={false} />
           <XAxis
@@ -134,8 +134,10 @@ function IfHistoryChart({
             tickLine={false}
             axisLine={false}
             tickMargin={8}
+            interval="preserveStartEnd"
+            tickFormatter={(v: string) => v.replace(/^JCR\s*/, "")}
           />
-          <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} />
+          <YAxis tickLine={false} axisLine={false} tickMargin={4} width={32} />
           <ChartTooltip
             content={
               <ChartTooltipContent
@@ -221,20 +223,21 @@ export default function JournalHistoryDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{t("journal.historyTitle")}</DialogTitle>
+      <DialogContent className="max-h-[85vh] w-[calc(100vw-1.5rem)] max-w-3xl grid-cols-[minmax(0,1fr)] content-start gap-3 overflow-y-auto overflow-x-hidden p-4 sm:gap-4 sm:p-6">
+        <DialogHeader className="pr-6">
+          <DialogTitle className="text-left text-lg">{t("journal.historyTitle")}</DialogTitle>
           <DialogDescription className="line-clamp-2">
             {journal.journalName}
           </DialogDescription>
         </DialogHeader>
 
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="if" disabled={ifHistory.length === 0}>
+          <TabsList className="grid h-10 w-full grid-cols-2 items-stretch">
+            <TabsTrigger className="h-full py-0" value="if" disabled={ifHistory.length === 0}>
               {t("journal.historyIfTab")}
             </TabsTrigger>
             <TabsTrigger
+              className="h-full py-0"
               value="partition"
               disabled={partitionHistory.length === 0}
             >
@@ -257,22 +260,22 @@ export default function JournalHistoryDialog({
             ) : (
               <>
                 <div className="overflow-x-auto rounded-lg ring-1 ring-border/50">
-                  <table className="w-full min-w-[640px] text-sm">
+                  <table className="w-full text-xs sm:min-w-[640px] sm:text-sm">
                     <thead>
                       <tr className="border-b bg-muted/40 text-left text-muted-foreground">
-                        <th className="px-3 py-2 font-medium">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap sm:px-3">
                           {t("journal.historyJcrColumn")}
                         </th>
-                        <th className="px-3 py-2 font-medium">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap sm:px-3">
                           {t("journal.historyPartitionSource")}
                         </th>
-                        <th className="px-3 py-2 font-medium">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap sm:px-3">
                           {t("journal.historyMajorCategory")}
                         </th>
-                        <th className="px-3 py-2 font-medium">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap sm:px-3">
                           {t("journal.historyMajorPartition")}
                         </th>
-                        <th className="px-3 py-2 font-medium">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap sm:px-3">
                           {t("journal.historyAuthority")}
                         </th>
                       </tr>
@@ -286,19 +289,19 @@ export default function JournalHistoryDialog({
                             row.editionId === currentEditionId && "bg-primary/5"
                           )}
                         >
-                          <td className="px-3 py-2.5 font-medium tabular-nums">
+                          <td className="px-2 py-2 sm:px-3 sm:py-2.5 font-medium tabular-nums">
                             {row.jcrLabel}
                           </td>
-                          <td className="px-3 py-2.5">{row.partitionLabel}</td>
-                          <td className="px-3 py-2.5">
+                          <td className="px-2 py-2 sm:px-3 sm:py-2.5">{row.partitionLabel}</td>
+                          <td className="px-2 py-2 sm:px-3 sm:py-2.5">
                             {getMajorCategoryName(row.majorCategory, locale)}
                           </td>
-                          <td className="px-3 py-2.5">
+                          <td className="px-2 py-2 sm:px-3 sm:py-2.5">
                             <PartitionZoneBadge
                               partition={row.majorCategoryPartition}
                             />
                           </td>
-                          <td className="px-3 py-2.5">
+                          <td className="px-2 py-2 sm:px-3 sm:py-2.5">
                             {formatAuthority(row.authorityJournal, t)}
                           </td>
                         </tr>

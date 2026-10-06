@@ -151,17 +151,17 @@ export default function JournalListItem({ journal, onClick, isEditing, isSelecte
               />
             </div>
 
-            <div className="journal-list-metrics flex items-start gap-6 md:gap-8 shrink-0 md:pl-4 md:border-l md:border-border/60">
-                <div className="flex flex-col items-start md:items-end min-w-[72px]">
-                    <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none h-4 flex items-center">{t('journal.impactFactor')}</p>
-                    <div className="mt-1 h-7 flex items-center">
+            <div className="journal-list-metrics flex items-center gap-0 md:items-start md:gap-8 shrink-0 md:pl-4 md:border-l md:border-border/60">
+                <div className="flex flex-row items-center gap-2 w-[9.5rem] shrink-0 md:w-auto md:flex-col md:items-end md:gap-0 md:min-w-[72px]">
+                    <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none md:h-4 flex items-center whitespace-nowrap">{t('journal.impactFactor')}</p>
+                    <div className="md:mt-1 h-7 flex items-center">
                         <p className="font-headline font-semibold text-base tabular-nums leading-none">{formatImpactFactor(journal.impactFactor)}</p>
                     </div>
                 </div>
                 {hasPartition && journal.majorCategoryPartition && (
-                <div className="flex flex-col items-start md:items-end min-w-[56px]">
-                    <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none h-4 flex items-center">{partitionShort}</p>
-                    <div className="mt-1 h-7 flex items-center">
+                <div className="flex flex-row items-center gap-2 md:flex-col md:items-end md:gap-0 md:min-w-[56px]">
+                    <p className="text-[10px] md:text-xs uppercase tracking-wide text-muted-foreground font-medium leading-none md:h-4 flex items-center whitespace-nowrap">{partitionShort}</p>
+                    <div className="md:mt-1 h-7 flex items-center">
                         <Badge variant={getPartitionBadgeVariant(journal.majorCategoryPartition)} className="text-sm px-2 py-0.5">
                             {getPartitionText(journal.majorCategoryPartition)}
                         </Badge>
