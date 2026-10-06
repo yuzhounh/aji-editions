@@ -128,7 +128,7 @@
 @media (min-width: 744px) and (min-height: 600px) and (pointer: coarse) {
   .journal-header-brand { white-space: nowrap; }
   .journal-header button, .journal-navigation-sheet button { min-height: 44px; min-width: 44px; }
-  .journal-navigation-sheet[role="dialog"] { width: min(360px, calc(100vw - 48px)); max-width: 360px; max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; }
+  .journal-navigation-sheet[role="dialog"], .journal-navigation-sheet { width: min(72vw, 248px) !important; max-width: 248px !important; max-height: 100dvh; overflow-y: auto; overscroll-behavior: contain; }
   .journal-detail-grid > * { min-width: 0; }
   .page-shell .journal-list-layout { flex-direction: row; align-items: center; justify-content: space-between; gap: 1.5rem; }
   .journal-list-layout .journal-list-metrics { gap: 2rem; padding-left: 1rem; border-left: 1px solid hsl(var(--border) / 0.6); }
