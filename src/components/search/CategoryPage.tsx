@@ -4,6 +4,7 @@
 
 import * as React from "react";
 import { useState, useMemo, useCallback } from "react";
+import Link from "next/link";
 import type { Journal } from "@/data/journals";
 import { AjiLogo } from "@/components/brand/AjiLogo";
 import { Button } from "@/components/ui/button";
@@ -950,9 +951,9 @@ export default function CategoryPage() {
         <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/70 shadow-sm">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-4 sm:gap-6">
-              <a href="/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <AjiLogo />
-              </a>
+              </Link>
               {desktopNavItems}
             </div>
 
