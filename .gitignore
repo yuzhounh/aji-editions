@@ -53,5 +53,10 @@ next-env.d.ts
 /public/data/editions.json
 /public/data/editions.*.json.gz
 /public/data/editions-manifest.json
+/public/data/edition.*.json.gz
+/public/data/history.*.json.gz
+/src/data/summaries/manifest.json
+/src/data/summaries/shards/
+/tmp/
 
 .vercel

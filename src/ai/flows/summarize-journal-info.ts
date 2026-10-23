@@ -6,7 +6,7 @@
  */
 
 import { z } from 'zod';
-import { getEditionById } from '@/data/journals';
+import { getEditionById, type Journal, type JournalDataset } from '@/data/journals';
 import { getStaticJournalSummary } from '@/data/summaries';
 import { getPrimaryIssn } from '@/lib/issn';
 
@@ -49,18 +49,25 @@ export type SummarizeJournalInfoOutput = z.infer<
   typeof SummarizeJournalInfoOutputSchema
 >;
 
+const journalIndexes = new WeakMap<JournalDataset, Map<string, Journal>>();
+
 function filterRelatedJournalsForEdition(
   relatedJournals: SummarizeJournalInfoOutput['relatedJournals'],
   editionId: string
 ): SummarizeJournalInfoOutput['relatedJournals'] {
   const edition = getEditionById(editionId);
-  const editionJournals = edition?.journals ?? [];
-  const journalMapByIssn = new Map(editionJournals.map(j => [getPrimaryIssn(j.issn), j]));
+  if (!edition) return [];
+  let journalMapByIssn = journalIndexes.get(edition);
+  if (!journalMapByIssn) {
+    journalMapByIssn = new Map(edition.journals.map(j => [getPrimaryIssn(j.issn), j]));
+    journalIndexes.set(edition, journalMapByIssn);
+  }
+  const index = journalMapByIssn;
 
   return relatedJournals
     .map(suggestedJournal => {
       const suggestedIssnPrefix = getPrimaryIssn(suggestedJournal.issn);
-      const foundJournal = journalMapByIssn.get(suggestedIssnPrefix);
+      const foundJournal = index.get(suggestedIssnPrefix);
 
       if (foundJournal) {
         return {

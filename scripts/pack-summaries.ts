@@ -7,6 +7,7 @@
 import fs from "fs";
 import path from "path";
 import zlib from "zlib";
+import { packSummaryAssets } from "./summary-assets";
 
 const ROOT = path.resolve(__dirname, "..");
 const PROGRESS_FILE = path.join(ROOT, "data", "cache", "summaries", "progress.json");
@@ -80,6 +81,7 @@ function main() {
 
   fs.writeFileSync(OUT_GZ, compressed);
   fs.writeFileSync(PUBLIC_GZ, compressed);
+  packSummaryAssets(ROOT, compressed);
 
   console.log(
     `[pack-summaries] packed ${sourceIds.length} entries -> ${OUT_GZ} (${(compressed.length / 1024 / 1024).toFixed(2)} MB gz)`

@@ -40,10 +40,18 @@ export type JournalDataset = {
   journals: Journal[];
 };
 
+export type EditionMetadata = Omit<JournalDataset, "journals">;
+export type DataAsset = { sha256: string; url: string };
+export type EditionShard = { edition: JournalDataset; historyIssns: string[] };
+
 export type EditionsManifest = {
   schemaVersion: 1;
   sha256: string;
   url: string;
+  // Keep the complete asset above for clients from earlier deployments.
+  collection?: Omit<EditionsCollection, "editions">;
+  editions?: (DataAsset & { metadata: EditionMetadata })[];
+  history?: { bucketCount: number; assets: Record<string, DataAsset> };
 };
 
 export type EditionsCollection = {

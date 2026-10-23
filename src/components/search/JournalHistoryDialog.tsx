@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import type { Journal } from "@/data/journals";
+import { useEffect, useMemo, useState } from "react";
+import type { Journal, JournalDataset } from "@/data/journals";
 import {
   Dialog,
   DialogContent,
@@ -195,12 +195,25 @@ export default function JournalHistoryDialog({
   open,
   onOpenChange,
 }: JournalHistoryDialogProps) {
-  const { editions, currentEditionId } = useEdition();
+  const { loadHistory, currentEditionId } = useEdition();
   const { t, locale } = useTranslation();
   const primaryIssn = getPrimaryIssn(journal.issn);
+  const [loaded, setLoaded] = useState<{ issn: string; editions: JournalDataset[] } | null>(null);
+  const [error, setError] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    setError(false);
+    loadHistory(primaryIssn).then(editions => {
+      if (!cancelled) setLoaded({ issn: primaryIssn, editions });
+    }).catch(() => { if (!cancelled) setError(true); });
+    return () => { cancelled = true; };
+  }, [open, primaryIssn, loadHistory, attempt]);
+  const editions = loaded?.issn === primaryIssn ? loaded.editions : null;
 
   const { ifHistory, partitionHistory } = useMemo(
-    () => buildJournalHistory(editions, primaryIssn),
+    () => buildJournalHistory(editions || [], primaryIssn),
     [editions, primaryIssn]
   );
 
@@ -231,6 +244,12 @@ export default function JournalHistoryDialog({
           </DialogDescription>
         </DialogHeader>
 
+        {error ? (
+          <div className="space-y-3 py-6 text-center" role="alert">
+            <p className="text-sm text-destructive">{t("edition.loadError")}</p>
+            <button type="button" className="min-h-10 rounded-md border px-4 text-sm" onClick={() => setAttempt(value => value + 1)}>{t("edition.retry")}</button>
+          </div>
+        ) : !editions ? <p className="py-8 text-center text-sm text-muted-foreground" role="status">{t("edition.loading")}</p> : (
         <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className="grid h-10 w-full grid-cols-2 items-stretch">
             <TabsTrigger className="h-full py-0" value="if" disabled={ifHistory.length === 0}>
@@ -355,6 +374,7 @@ export default function JournalHistoryDialog({
             )}
           </TabsContent>
         </Tabs>
+        )}
       </DialogContent>
     </Dialog>
   );

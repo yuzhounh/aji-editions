@@ -3,3 +3,9 @@
 
 /data/editions.*.json.gz
   Cache-Control: public, max-age=31536000, immutable
+
+/data/edition.*.json.gz
+  Cache-Control: public, max-age=31536000, immutable
+
+/data/history.*.json.gz
+  Cache-Control: public, max-age=31536000, immutable
