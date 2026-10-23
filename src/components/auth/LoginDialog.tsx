@@ -27,6 +27,9 @@ import { useFirebase } from "@/firebase";
 import {
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  type Auth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -66,6 +69,19 @@ const formSchema = (view: 'login' | 'register' | 'reset', t: (key: string) => st
 type FormValues = z.infer<ReturnType<typeof formSchema>>;
 type AuthView = 'choose' | 'login' | 'register' | 'reset';
 
+// StrictMode and multiple login surfaces must consume the redirect result only once.
+const redirectResults = new WeakMap<Auth, Promise<void>>();
+const notifiedRedirectErrors = new WeakSet<Auth>();
+function finishGoogleRedirect(auth: Auth) {
+  let result = redirectResults.get(auth);
+  if (!result) {
+    // Existing onAuthStateChanged handles the user; do not retain/replay credentials.
+    result = getRedirectResult(auth).then(() => undefined);
+    redirectResults.set(auth, result);
+  }
+  return result;
+}
+
 interface LoginDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -85,9 +101,21 @@ function GoogleIcon() {
 export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { auth } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGooglePopupBlocked, setIsGooglePopupBlocked] = useState(false);
   const [view, setView] = useState<AuthView>("choose");
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    let active = true;
+    finishGoogleRedirect(auth).catch((error: Error) => {
+      if (active && !notifiedRedirectErrors.has(auth)) {
+        notifiedRedirectErrors.add(auth);
+        toast({ variant: "destructive", title: t('auth.googleSignInFailed'), description: error.message });
+      }
+    });
+    return () => { active = false; };
+  }, [auth, t, toast]);
 
   const emailView = view === 'login' || view === 'register' ? view : 'login';
 
@@ -122,14 +150,31 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     const provider = new GoogleAuthProvider();
     try {
       await signInWithPopup(auth, provider);
+      setIsGooglePopupBlocked(false);
       onOpenChange(false);
     } catch (error: any) {
+      if (error.code === 'auth/popup-blocked') {
+        setIsGooglePopupBlocked(true);
+        return;
+      }
+      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') return;
       toast({
         variant: "destructive",
         title: t('auth.googleSignInFailed'),
         description: error.message || t('auth.unknownError'),
       });
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleRedirect = async () => {
+    if (!auth || isLoading) return;
+    setIsLoading(true);
+    try {
+      await signInWithRedirect(auth, new GoogleAuthProvider());
+    } catch (error: any) {
+      toast({ variant: "destructive", title: t('auth.googleSignInFailed'), description: error.message || t('auth.unknownError') });
       setIsLoading(false);
     }
   };
@@ -201,8 +246,17 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         ) : (
           <GoogleIcon />
         )}
-        {t('auth.continueWithGoogle')}
+        {t(isGooglePopupBlocked ? 'auth.retryGooglePopup' : 'auth.continueWithGoogle')}
       </Button>
+      {isGooglePopupBlocked && (
+        <div className="space-y-2" role="status">
+          <p className="text-sm text-muted-foreground">{t('auth.googlePopupBlocked')}</p>
+          <Button type="button" variant="outline" className="min-h-12 w-full" onClick={handleGoogleRedirect} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('auth.googleContinueInPage')}
+          </Button>
+        </div>
+      )}
       <Button
         type="button"
         variant="outline"
