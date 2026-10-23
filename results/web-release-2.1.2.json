@@ -1,0 +1,123 @@
+{
+  "version": "2.1.2",
+  "source": "60a517ee8714d863fc250f471d99a359b5f8a98f",
+  "vercel": "dpl_5j2EpkE44xY24rEzLxHKMjirW3Cd",
+  "cloudflare": "90167d6f",
+  "pagesCI": 39882996823,
+  "applicationCI": 39882996830,
+  "sites": [
+    {
+      "platform": "Vercel",
+      "url": "https://aji-editions.vercel.app",
+      "assets": [
+        {
+          "path": "data/editions-manifest.json",
+          "bytes": 15623,
+          "sha256": "28F4728D9A806C10D03A988E8A12105DDA4700D350999AA94E18759BE870FD18"
+        },
+        {
+          "path": "/data/edition.aji-2027.b3e5ad5dde41789aa6a2058c989ac35ab530f431ebd62e2e90aff2ce5df96dc2.json.gz",
+          "bytes": 769214,
+          "sha256": "B3E5AD5DDE41789AA6A2058C989AC35AB530F431EBD62E2E90AFF2CE5DF96DC2"
+        },
+        {
+          "path": "/data/edition.aji-2026.d027aff71fb97fde2f1ca9327732fcf2e722da311c61184de938cb90a4f9e6f1.json.gz",
+          "bytes": 1133668,
+          "sha256": "D027AFF71FB97FDE2F1CA9327732FCF2E722DA311C61184DE938CB90A4F9E6F1"
+        },
+        {
+          "path": "/data/history.10.468d5671d47f4d0e28577f10bb14f2ed31a722a749da84baff3e6f5fdbdb59d4.json.gz",
+          "bytes": 98945,
+          "sha256": "468D5671D47F4D0E28577F10BB14F2ED31A722A749DA84BAFF3E6F5FDBDB59D4"
+        },
+        {
+          "path": "/",
+          "bytes": 10614,
+          "sha256": "C155AF9E47DBCE8349283D7A3A59F72FC61B79B887752FECD230870E035CE112"
+        },
+        {
+          "path": "/_next/static/chunks/4bd1b696-031ca8e5e5dfa4a1.js",
+          "bytes": 168418,
+          "sha256": "B76C964F7BD64712BA0780AA4EC720C8CB5DEEFA8B43D25FCF828B778EF178FD"
+        },
+        {
+          "path": "/_next/static/css/cc4052414eb6129b.css",
+          "bytes": 69241,
+          "sha256": "1247E9C9A2FE62347AC986CE0BB0A1066206C9F9CE209E2E5DE0498657F01EE9"
+        },
+        {
+          "path": "favicon.svg",
+          "bytes": 765,
+          "sha256": "4572B04D851C3F6E71BFA7D501694883E225378F81DEAFE9F9005FC850BC440C"
+        },
+        {
+          "path": "share/performance-missing-20261023?source=verify",
+          "bytes": 11112,
+          "sha256": "C459D49805DB616E5A52865711FCE0E71991E98954102B619E7F7148C58E4173"
+        }
+      ],
+      "catalogSource": "24dfc3cca2844eb066655ea325e8fdfcdf4a37e76c19a14cecc57867d9e3229f",
+      "cacheHeadersVerified": true,
+      "shareRoute": true
+    },
+    {
+      "platform": "Cloudflare",
+      "url": "https://aji-editions.pages.dev",
+      "assets": [
+        {
+          "path": "data/editions-manifest.json",
+          "bytes": 15623,
+          "sha256": "28F4728D9A806C10D03A988E8A12105DDA4700D350999AA94E18759BE870FD18"
+        },
+        {
+          "path": "/data/edition.aji-2027.b3e5ad5dde41789aa6a2058c989ac35ab530f431ebd62e2e90aff2ce5df96dc2.json.gz",
+          "bytes": 769214,
+          "sha256": "B3E5AD5DDE41789AA6A2058C989AC35AB530F431EBD62E2E90AFF2CE5DF96DC2"
+        },
+        {
+          "path": "/data/edition.aji-2026.d027aff71fb97fde2f1ca9327732fcf2e722da311c61184de938cb90a4f9e6f1.json.gz",
+          "bytes": 1133668,
+          "sha256": "D027AFF71FB97FDE2F1CA9327732FCF2E722DA311C61184DE938CB90A4F9E6F1"
+        },
+        {
+          "path": "/data/history.10.468d5671d47f4d0e28577f10bb14f2ed31a722a749da84baff3e6f5fdbdb59d4.json.gz",
+          "bytes": 98945,
+          "sha256": "468D5671D47F4D0E28577F10BB14F2ED31A722A749DA84BAFF3E6F5FDBDB59D4"
+        },
+        {
+          "path": "/",
+          "bytes": 10614,
+          "sha256": "C155AF9E47DBCE8349283D7A3A59F72FC61B79B887752FECD230870E035CE112"
+        },
+        {
+          "path": "/_next/static/chunks/4bd1b696-031ca8e5e5dfa4a1.js",
+          "bytes": 168418,
+          "sha256": "B76C964F7BD64712BA0780AA4EC720C8CB5DEEFA8B43D25FCF828B778EF178FD"
+        },
+        {
+          "path": "/_next/static/css/cc4052414eb6129b.css",
+          "bytes": 69241,
+          "sha256": "1247E9C9A2FE62347AC986CE0BB0A1066206C9F9CE209E2E5DE0498657F01EE9"
+        },
+        {
+          "path": "favicon.svg",
+          "bytes": 765,
+          "sha256": "4572B04D851C3F6E71BFA7D501694883E225378F81DEAFE9F9005FC850BC440C"
+        },
+        {
+          "path": "share/performance-missing-20261023?source=verify",
+          "bytes": 11112,
+          "sha256": "1CB1A1F08F02A46FABA2321DC9E66961224DB1BDACF14DFD3737D0E15A5435C2"
+        }
+      ],
+      "catalogSource": "24dfc3cca2844eb066655ea325e8fdfcdf4a37e76c19a14cecc57867d9e3229f",
+      "cacheHeadersVerified": true,
+      "shareRoute": true
+    }
+  ],
+  "pagesSourceMatched": true,
+  "pagesEntryMatched": true,
+  "firebase302PreservesPathAndQuery": true,
+  "netlify": "deferred, no calls",
+  "verifiedAt": "2026-10-23T09:21:44.5382197+08:00"
+}
