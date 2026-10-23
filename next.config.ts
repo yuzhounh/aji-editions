@@ -2,6 +2,7 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   experimental: {
+    cpus: 2,
     serverActions: {
       allowedOrigins: ['aji-editions.pages.dev'],
     },
@@ -16,14 +17,18 @@ const nextConfig: NextConfig = {
         source: '/data/editions.:hash([a-f0-9]+).json.gz',
         headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
       },
+      {
+        source: '/data/:asset(edition|history).:rest(.+).json.gz',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
     ];
   },
   outputFileTracingIncludes: {
     '/**/*': [
-      './src/data/editions/editions.json.gz',
-      './public/data/editions.json.gz',
-      './src/data/summaries/summaries.json.gz',
-      './public/data/summaries.json.gz',
+      './public/data/editions-manifest.json',
+      './public/data/edition.*.json.gz',
+      './src/data/summaries/manifest.json',
+      './src/data/summaries/shards/*.json.gz',
     ],
   },
   images: {

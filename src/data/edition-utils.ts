@@ -6,9 +6,9 @@ export function editionHasPartition(
   return edition.partitionType !== "jcr-only";
 }
 
-export function sortEditionsByYearDesc(
-  editions: JournalDataset[]
-): JournalDataset[] {
+export function sortEditionsByYearDesc<T extends Pick<JournalDataset, "partitionYear" | "impactFactorYear">>(
+  editions: T[]
+): T[] {
   return [...editions].sort((a, b) => {
     if (b.partitionYear !== a.partitionYear) {
       return b.partitionYear - a.partitionYear;

@@ -1,0 +1,26 @@
+# Upload only deployable source. Existing production environment stays on Vercel.
+**
+!package.json
+!package-lock.json
+!next.config.ts
+!tsconfig.json
+!.eslintrc.json
+!tailwind.config.ts
+!postcss.config.mjs
+!components.json
+!vercel.json
+!src/
+!src/**
+!public/
+!public/**
+!scripts/
+!scripts/**
+!vendor/
+!vendor/**
+# Regenerated from the unchanged canonical gzip inputs by prebuild.
+src/data/summaries/manifest.json
+src/data/summaries/shards/**
+public/data/editions-manifest.json
+public/data/editions.*.json.gz
+public/data/edition.*.json.gz
+public/data/history.*.json.gz

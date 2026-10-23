@@ -1,0 +1,35 @@
+{
+  "editions": {
+    "sourceSha256": "24dfc3cca2844eb066655ea325e8fdfcdf4a37e76c19a14cecc57867d9e3229f",
+    "sourceCompressedBytes": 4372072,
+    "sourceJsonBytes": 42672646,
+    "catalogBytes": 15623,
+    "editions": {
+      "aji-2027": 769214,
+      "aji-2026": 1133668,
+      "aji-2025": 1103304,
+      "aji-2024": 642210,
+      "aji-2023": 606465,
+      "aji-2022": 604915
+    },
+    "defaultEdition": "aji-2026",
+    "defaultFirstLoadBytes": 1149291,
+    "journalRecords": 105258,
+    "historyBuckets": 64,
+    "largestHistoryBucketBytes": 107238,
+    "allAnnualAndHistoryFieldsEqual": true
+  },
+  "summaries": {
+    "sourceSha256": "f0036aa006ae7d414c56df38bcf9cbe799d0b120f41a20d66e749301b76f6a22",
+    "sourceCompressedBytes": 23027113,
+    "sourceJsonBytes": 93890331,
+    "entries": 23561,
+    "buckets": 256,
+    "largestBucketBytes": 130710,
+    "largestBucketJsonBytes": 465803,
+    "decodedCacheBuckets": 8,
+    "allSummaryFieldsEqual": true
+  },
+  "verifiedAt": "2026-10-23T01:00:22.647Z",
+  "modelCalls": 0
+}

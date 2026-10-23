@@ -18,6 +18,8 @@
 
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
+Current daily update: **2.1.2**. Annual data and journal history load on demand; bilingual summaries use bounded server caches. Data, account and favorites formats are unchanged. See [current maintenance status](docs/maintenance_status.md); the public GitHub Release remains separate.
+
 ## Editions
 
 Six editions (2022–2027). Default UI edition: **2026 Edition** (`aji-2026`).
@@ -44,9 +46,9 @@ npm run build:editions
         ↓
 src/data/editions/editions.json.gz  (+ public/data/editions.json.gz)
         ↓
-npm run pack:editions → public/data/editions.<sha256>.json.gz + editions-manifest.json
+npm run pack:editions → catalog + annual assets + ISSN history buckets (+ complete legacy asset)
         ↓
-Client revalidates the manifest → caches the versioned dataset → Edition switcher in UI
+Client revalidates catalog → loads selected year → loads one history bucket when opened
 ```
 
 Raw data from [hitfyd/ShowJCR](https://github.com/hitfyd/ShowJCR). Authority journal levels computed using [Authoritative-Journal-Classification](https://github.com/yuzhounh/Authoritative-Journal-Classification) rules.
@@ -84,7 +86,7 @@ GitHub Actions runs the checks and production build on Node.js 22. `predev` and 
 
 The manifest uses `Cache-Control: no-cache`; hashed datasets use `public, max-age=31536000, immutable`. Next.js config provides these headers for its server, and `public/_headers` describes the equivalent Cloudflare static-hosting policy. A platform adapter must preserve the generated assets and headers. Other hosting platforms need equivalent header rules; an application build alone does not validate a cloud deployment.
 
-The client shares an in-flight request and the decoded collection within each page session. Language and edition switches reuse that collection. Failed loads are evicted and expose a Retry button. Reloading revalidates the manifest and uses a new URL when the dataset changes. This version still loads all editions together to support history views; splitting by year is a separate optimization if slow-network or mobile measurements justify it.
+The client shares pending work and caches up to six decoded annual datasets and four history buckets per page session. Language changes reuse data. Year changes load only the requested year and retain the last working selection on failure; failed requests remain retryable. History loads one ISSN bucket containing its existing records across years. Reloading revalidates the catalog; content hashes preserve immutable caching and the complete legacy URL remains available for older clients. Prebuild also repackages existing bilingual summaries into 256 server-only buckets, with eight decoded buckets retained; server edition lookups retain two years. No model call or data regeneration is needed.
 
 ISSN and JCR release-year rules come from the versioned local `@aji/core` package in `vendor/aji-core/`. The single-edition application vendors the same reviewed version. See [the core maintenance instructions](vendor/aji-core/README.md) for the sync command and favorites-ID compatibility policy.
 

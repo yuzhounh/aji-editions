@@ -44,7 +44,6 @@ import AddToFavoritesDialog from "../favorites/AddToFavoritesDialog";
 import { collection, query, where } from 'firebase/firestore';
 import { Skeleton } from "../ui/skeleton";
 import JournalHistoryDialog from "./JournalHistoryDialog";
-import { journalHasMultiEditionHistory } from "@/lib/journal-history";
 
 interface JournalDetailProps {
   journal: Journal;
@@ -58,8 +57,8 @@ type SummaryCache = {
   [cacheKey: string]: JournalSummaryInfo;
 };
 
-function summaryCacheKey(issn: string, locale: string) {
-  return `${issn}:${locale}`;
+function summaryCacheKey(issn: string, locale: string, editionId: string) {
+  return `${getPrimaryIssn(issn)}:${locale}:${editionId}`;
 }
 
 const formatImpactFactor = (factor: number | string) => {
@@ -116,14 +115,14 @@ export default function JournalDetail({ journal, onBack, onJournalSelect, isHist
   const [error, setError] = useState<string | null>(null);
   const { user, firestore } = useFirebase();
   const { t, locale } = useTranslation();
-  const { currentEditionId, editions } = useEdition();
+  const { currentEditionId, hasHistory } = useEdition();
   const { partition, description, hasPartition } = usePartitionTerminology();
   const [isFavoritesDialogOpen, setIsFavoritesDialogOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   const journalId = getPrimaryIssn(journal.issn);
-  const showHistoryButton = journalHasMultiEditionHistory(editions, journalId);
-  const cacheKey = summaryCacheKey(journal.issn, locale);
+  const showHistoryButton = hasHistory(journalId);
+  const cacheKey = summaryCacheKey(journal.issn, locale, currentEditionId);
   const summaryInfo = summaryCache[cacheKey];
 
   const favoritesQuery = useMemoFirebase(

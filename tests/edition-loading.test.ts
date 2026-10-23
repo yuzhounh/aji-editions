@@ -87,7 +87,8 @@ test("packing preserves dataset bytes and changes the URL when the data changes"
   const diskManifest = JSON.parse(readFileSync(join(root, "public/data/editions-manifest.json"), "utf8"));
   assert.deepEqual(diskManifest, second);
   const loader = createEditionsLoader(async (input) =>
-    String(input).endsWith("manifest.json") ? Response.json(diskManifest) : new Response(secondData)
+    String(input).endsWith("manifest.json") ? Response.json(diskManifest)
+      : new Response(new Uint8Array(readFileSync(join(root, "public", String(input)))))
   );
   assert.equal((await loader()).version, "v2");
 });
