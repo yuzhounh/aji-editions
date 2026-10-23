@@ -324,6 +324,7 @@
         "retryGooglePopup": "重试 Google 登录弹窗",
         "googlePopupBlocked": "浏览器未能打开登录窗口。可以重试，或在当前页面继续登录。",
         "googleContinueInPage": "在当前页面使用 Google 登录",
+        "googleLoginDetails": "登录故障详情",
         "continueWithEmail": "使用邮箱登录或注册",
         "backToSignInOptions": "其他登录方式",
         "email": "邮箱",
