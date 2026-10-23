@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent } from "react";
 import { useForm, type UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -68,6 +68,7 @@ const formSchema = (view: 'login' | 'register' | 'reset', t: (key: string) => st
 
 type FormValues = z.infer<ReturnType<typeof formSchema>>;
 type AuthView = 'choose' | 'login' | 'register' | 'reset';
+const isVercelLoginHost = () => typeof window !== 'undefined' && window.location.hostname === 'aji-editions.vercel.app';
 
 // StrictMode and multiple login surfaces must consume the redirect result only once.
 const redirectResults = new WeakMap<Auth, Promise<void>>();
@@ -102,11 +103,13 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   const { auth } = useFirebase();
   const [isLoading, setIsLoading] = useState(false);
   const [isGooglePopupBlocked, setIsGooglePopupBlocked] = useState(false);
+  const [popupDiagnostic, setPopupDiagnostic] = useState<Record<string, boolean | number | null> | null>(null);
   const [view, setView] = useState<AuthView>("choose");
   const { toast } = useToast();
   const { t } = useTranslation();
 
   useEffect(() => {
+    if (!isVercelLoginHost()) return;
     let active = true;
     finishGoogleRedirect(auth).catch((error: Error) => {
       if (active && !notifiedRedirectErrors.has(auth)) {
@@ -144,8 +147,15 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   }, [view, form]);
 
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSignIn = async (event: MouseEvent<HTMLButtonElement>) => {
     if (!auth) return;
+    const startedAt = performance.now();
+    const diagnostic = isVercelLoginHost() ? {
+      trustedClick: event.isTrusted,
+      activationAtClick: navigator.userActivation?.isActive ?? null,
+      nativeWindowOpen: /\[native code\]/.test(Function.prototype.toString.call(window.open)),
+      topLevelPage: window.top === window,
+    } : null;
     setIsLoading(true);
     const provider = new GoogleAuthProvider();
     try {
@@ -153,11 +163,12 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
       setIsGooglePopupBlocked(false);
       onOpenChange(false);
     } catch (error: any) {
-      if (error.code === 'auth/popup-blocked') {
+      if (isVercelLoginHost() && error.code === 'auth/popup-blocked') {
+        setPopupDiagnostic({ ...diagnostic, elapsedMs: Math.round(performance.now() - startedAt), activationAtFailure: navigator.userActivation?.isActive ?? null });
         setIsGooglePopupBlocked(true);
         return;
       }
-      if (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request') return;
+      if (isVercelLoginHost() && (error.code === 'auth/popup-closed-by-user' || error.code === 'auth/cancelled-popup-request')) return;
       toast({
         variant: "destructive",
         title: t('auth.googleSignInFailed'),
@@ -169,7 +180,7 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
   };
 
   const handleGoogleRedirect = async () => {
-    if (!auth || isLoading) return;
+    if (!auth || isLoading || !isVercelLoginHost()) return;
     setIsLoading(true);
     try {
       await signInWithRedirect(auth, new GoogleAuthProvider());
@@ -248,13 +259,19 @@ export default function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
         )}
         {t(isGooglePopupBlocked ? 'auth.retryGooglePopup' : 'auth.continueWithGoogle')}
       </Button>
-      {isGooglePopupBlocked && (
+      {isGooglePopupBlocked && isVercelLoginHost() && (
         <div className="space-y-2" role="status">
           <p className="text-sm text-muted-foreground">{t('auth.googlePopupBlocked')}</p>
           <Button type="button" variant="outline" className="min-h-12 w-full" onClick={handleGoogleRedirect} disabled={isLoading}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {t('auth.googleContinueInPage')}
           </Button>
+          {popupDiagnostic && (
+            <details className="text-xs text-muted-foreground">
+              <summary className="cursor-pointer">{t('auth.googleLoginDetails')}</summary>
+              <pre className="mt-2 overflow-auto whitespace-pre-wrap">{JSON.stringify(popupDiagnostic, null, 2)}</pre>
+            </details>
+          )}
         </div>
       )}
       <Button

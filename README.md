@@ -18,7 +18,7 @@
 
 Multi-year edition line of [Academic Journal Index (AJI)](https://github.com/yuzhounh/academic-journal-index). Switch between paired CAS/XR partition tables and JCR impact factor datasets from different release years.
 
-Current daily update: **2.1.3**. Google sign-in offers an explicit retry and full-page fallback when its popup is blocked. Annual data and journal history load on demand; bilingual summaries use bounded server caches. Data, account and favorites formats are unchanged. See [current maintenance status](docs/maintenance_status.md); the public GitHub Release remains separate.
+Current daily update: **2.1.4**. Vercel-only Google popup recovery includes explicit retry, full-page fallback, and local troubleshooting details; Cloudflare keeps its original popup flow. Annual data and journal history load on demand; bilingual summaries use bounded server caches. Data, account and favorites formats are unchanged. See [current maintenance status](docs/maintenance_status.md); the public GitHub Release remains separate.
 
 ## Editions
 
