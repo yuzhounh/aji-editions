@@ -1,6 +1,8 @@
 # 当前性能优化状态
 
-当前登录兼容诊断 **2.1.4**：2.1.3发布后用户反馈两种Vercel登录均失败，不能标为修复完成。现将新增整页恢复/回调消费精确限制到aji-editions.vercel.app，Cloudflare恢复原弹窗调用路径；仅Vercel失败时可展开本地故障详情（点击可信度、激活状态、开窗函数是否原生、顶层状态及耗时），不记录账号、UID、凭据或OAuth参数。隔离系统Chrome在常规弹窗拦截策略下，两域均能打开真实Firebase弹窗，因此尚不能证明Vercel部署配置有错。日常Chrome复现失败，页面未加载Toolbar；不以此修改全局权限、清理账号/收藏或重构SDK/AuthDomain。最新发布及验收结果见 `../results/performance-release-20261023.json`。
+当前日常版本 **2.1.5**：用户确认AdGuard精确例外已恢复登录后，已按要求清理整页备用登录、getRedirectResult恢复消费、Vercel专用分支、开窗诊断状态/界面及8条临时中英文文案。登录组件与文案恢复为b7e6f21的排查前版本；保留原Google弹窗、邮箱登录/注册/验证邮件/密码重置。年度/历史按需加载、缓存、收藏及Firebase/Auth配置、账号数据均未回退或清理。Cloudflare继续使用既有网关和原登录流程，不为此修改其配置。发布与相关两域检查见 ../results/performance-release-20261023.json；下方保留历史根因证据。
+
+已定位原弹窗错误的直接来源：日常Chrome的window.open为AdGuard注入的newOpenWrapper；脚本源元数据name=prevent-window-open、engine=extension、domainName=aji-editions.vercel.app、args=[]，命中后返回noopNull()。用户点击可信/激活仍有效（585ms），排除将此解释为未允许弹窗或手势过期。建议仅在AdGuard用户规则添加`aji-editions.vercel.app#@%#//scriptlet('prevent-window-open')`，用户已添加该单站例外并确认原Google登录正常；不关闭全局过滤，不绕过脚本，不再扩大共用认证改动。
 
 以下为上一轮性能交付记录：2026-10-23，日常版本 **2.1.2 / 60a517ee8714d863fc250f471d99a359b5f8a98f** 已推送并发布至当前允许平台。暂无独立 EXE/APK，桌面和手机使用同一网页。公开 GitHub Release 保持 v2.1.1。
 
