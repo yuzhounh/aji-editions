@@ -1,40 +1,29 @@
 "use client"
 
-import * as React from "react"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { useTranslation } from "@/i18n/provider"
 
 export function ThemeToggle() {
   const { setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const isDark = mounted && resolvedTheme === "dark"
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark")
-  }
+  const { t } = useTranslation()
+  const isDark = resolvedTheme === "dark"
+  const Icon = isDark ? Moon : Sun
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={toggleTheme}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    <DropdownMenuItem
+      className="min-h-10 cursor-pointer"
+      onSelect={(event) => {
+        event.preventDefault()
+        setTheme(isDark ? "light" : "dark")
+      }}
     >
-      {mounted ? (
-        isDark ? (
-          <Moon className="h-[1.2rem] w-[1.2rem]" />
-        ) : (
-          <Sun className="h-[1.2rem] w-[1.2rem]" />
-        )
-      ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
-      )}
-    </Button>
+      <Icon className="text-muted-foreground" />
+      <span>{t("preferences.theme")}</span>
+      <span className="ml-auto text-muted-foreground">
+        {t(isDark ? "preferences.dark" : "preferences.light")}
+      </span>
+    </DropdownMenuItem>
   )
 }

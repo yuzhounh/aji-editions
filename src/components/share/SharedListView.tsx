@@ -16,8 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import JournalListItem from "@/components/search/JournalListItem";
 import LoginDialog from "@/components/auth/LoginDialog";
 import EditionSwitcher from "@/components/edition/EditionSwitcher";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { LanguageToggle } from "@/components/theme/LanguageToggle";
+import UserAvatar from "@/components/auth/UserAvatar";
 import { Loader2, BookmarkPlus, Home } from "lucide-react";
 import type { Journal } from "@/data/journals";
 
@@ -250,19 +249,19 @@ export default function SharedListView({ shareId }: SharedListViewProps) {
       <div className="page-shell flex min-h-screen w-full flex-col">
         <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-md">
           <div className="flex h-16 items-center justify-between gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <AjiLogo className="h-8 w-auto" />
+            <Link href="/" aria-label={t("share.backHome")} className="flex shrink-0 items-center">
+              <AjiLogo showLabel={false} className="sm:hidden" />
+              <AjiLogo className="hidden sm:flex" />
             </Link>
             <div className="flex items-center gap-2">
               <EditionSwitcher />
-              <LanguageToggle />
-              <ThemeToggle />
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" className="hidden sm:inline-flex">
                 <Link href="/">
                   <Home className="mr-2 h-4 w-4" />
                   {t("share.backHome")}
                 </Link>
               </Button>
+              <UserAvatar onLoginClick={() => setIsLoginOpen(true)} />
             </div>
           </div>
         </header>

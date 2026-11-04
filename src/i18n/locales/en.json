@@ -310,6 +310,13 @@
             "button": "Open a GitHub Issue"
         }
     },
+    "preferences": {
+        "language": "Language",
+        "theme": "Appearance",
+        "light": "Light",
+        "dark": "Dark",
+        "guest": "Guest"
+    },
     "auth": {
         "welcomeBack": "Welcome Back",
         "createAccount": "Create an Account",

@@ -13,8 +13,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useFirebase } from "@/firebase";
 import { signOut } from "firebase/auth";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon } from "lucide-react";
 import { useTranslation } from "@/i18n/provider";
+import { LanguageToggle } from "@/components/theme/LanguageToggle";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 interface UserAvatarProps {
   onLoginClick: () => void;
@@ -33,50 +35,45 @@ export default function UserAvatar({ onLoginClick }: UserAvatarProps) {
     }
   };
 
-  if (!user) {
-    return (
-      <Button variant="outline" size="sm" onClick={onLoginClick}>
-        <LogIn className="mr-2 h-4 w-4" />
-        {t('auth.login')}
-      </Button>
-    );
-  }
-
-  const getInitial = () => {
-    if (user.displayName) {
-      return user.displayName.charAt(0).toUpperCase();
-    }
-    if (user.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return "?";
-  };
-  const userInitial = getInitial();
+  const userInitial = (user?.displayName || user?.email || "?").charAt(0).toUpperCase();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="relative h-9 w-9 rounded-full p-0"
-          aria-label={t('auth.accountMenu')}
-        >
+        <Button variant="ghost" size="icon" className="rounded-full p-0" aria-label={t('auth.accountMenu')}>
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
-            <AvatarFallback>{userInitial}</AvatarFallback>
+            <AvatarImage src={user?.photoURL ?? undefined} alt="" />
+            <AvatarFallback>{user ? userInitial : <UserIcon aria-hidden="true" />}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={8}
+        collisionPadding={8}
+        className="w-60 max-w-[var(--radix-dropdown-menu-content-available-width)] max-h-[var(--radix-dropdown-menu-content-available-height)] overflow-y-auto rounded-xl"
+      >
         <DropdownMenuLabel>
-          <p className="font-medium">{user.displayName || "User"}</p>
-          <p className="text-xs text-muted-foreground font-normal truncate">{user.email}</p>
+          <p className="truncate font-medium">{user ? user.displayName || user.email : t('preferences.guest')}</p>
+          {user?.displayName && user.email && (
+            <p className="truncate text-xs font-normal text-muted-foreground">{user.email}</p>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>{t('auth.logout')}</span>
-        </DropdownMenuItem>
+        <LanguageToggle />
+        <ThemeToggle />
+        <DropdownMenuSeparator />
+        {user ? (
+          <DropdownMenuItem onClick={handleSignOut} className="min-h-10 cursor-pointer">
+            <LogOut className="mr-2 h-4 w-4" />
+            <span>{t('auth.logout')}</span>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem onSelect={onLoginClick} className="min-h-10 cursor-pointer">
+            <LogIn className="mr-2 h-4 w-4" />
+            <span>{t('auth.login')}</span>
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

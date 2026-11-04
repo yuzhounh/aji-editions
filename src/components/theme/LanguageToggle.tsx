@@ -1,26 +1,25 @@
 "use client"
 
-import * as React from "react"
+import { Globe } from "lucide-react"
 import { useTranslation } from "@/i18n/provider"
-import { Button } from "@/components/ui/button"
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 
 export function LanguageToggle() {
-  const { locale, setLocale } = useTranslation()
-
-  const toggleLocale = () => {
-    setLocale(locale === "zh" ? "en" : "zh")
-  }
+  const { locale, setLocale, t } = useTranslation()
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      onClick={toggleLocale}
-      aria-label={locale === "zh" ? "Switch to English" : "切换为中文"}
+    <DropdownMenuItem
+      className="min-h-10 cursor-pointer"
+      onSelect={(event) => {
+        event.preventDefault()
+        setLocale(locale === "zh" ? "en" : "zh")
+      }}
     >
-      <span className="text-xs font-bold leading-none">
-        {locale === "zh" ? "中" : "EN"}
+      <Globe className="text-muted-foreground" />
+      <span>{t("preferences.language")}</span>
+      <span className="ml-auto font-medium text-primary">
+        {locale === "zh" ? "简体中文" : "English"}
       </span>
-    </Button>
+    </DropdownMenuItem>
   )
 }

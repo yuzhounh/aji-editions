@@ -310,6 +310,13 @@
             "errorTitle": "清空收藏时出错"
         }
     },
+    "preferences": {
+        "language": "界面语言",
+        "theme": "外观主题",
+        "light": "浅色",
+        "dark": "深色",
+        "guest": "访客"
+    },
     "auth": {
         "welcomeBack": "欢迎回来",
         "createAccount": "创建账户",
