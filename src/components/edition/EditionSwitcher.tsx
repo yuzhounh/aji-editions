@@ -56,7 +56,7 @@ function EditionOption({
       {showSubtitle && (
         <span
           className={cn(
-            "text-muted-foreground",
+            "text-muted-foreground group-focus/edition:text-accent-foreground",
             compact ? "text-[10px] leading-none" : "text-xs"
           )}
         >
@@ -107,7 +107,7 @@ export default function EditionSwitcher({
           <SelectItem
             key={edition.id}
             value={edition.id}
-            className="pl-2 pr-2 [&>span:first-child]:hidden"
+            className="group/edition pl-2 pr-2 [&>span:first-child]:hidden"
           >
             <EditionOption edition={edition} locale={locale} />
           </SelectItem>
